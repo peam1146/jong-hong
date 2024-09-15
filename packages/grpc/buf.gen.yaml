@@ -1,0 +1,16 @@
+version: v2
+plugins:
+  - local: ./node_modules/ts-proto/protoc-gen-ts_proto
+    out: gen/nestjs
+    strategy: all
+    opt:
+      - esModuleInterop=true
+      - importSuffix=.js
+      - nestJs=true
+      - addGrpcMetadata=true
+  - local: ./node_modules/ts-proto/protoc-gen-ts_proto
+    out: gen/ts
+    strategy: all
+    opt:
+      - esModuleInterop=true
+      - importSuffix=.js
