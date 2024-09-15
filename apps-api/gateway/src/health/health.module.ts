@@ -6,6 +6,10 @@ import { BOOKING_HEALTH_SERVICE_NAME } from '@jong-hong/grpc/nestjs/proto/bookin
 import { join } from 'path';
 
 const __dirname = process.cwd();
+console.log(
+  'BOOKING_GRPC_PROTO_PATH',
+  process.env.VITE_BOOKING_GRPC_PROTO_PATH,
+);
 
 @Module({
   imports: [
@@ -14,8 +18,12 @@ const __dirname = process.cwd();
         name: BOOKING_HEALTH_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
+          url: 'localhost:50051',
           package: 'booking',
-          protoPath: join(__dirname, process.env.BOOKING_GRPC_PROTO_PATH),
+          protoPath: join(
+            __dirname,
+            '../../packages/grpc/proto/booking/health.proto',
+          ),
         },
       },
     ]),

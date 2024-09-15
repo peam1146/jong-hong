@@ -6,7 +6,7 @@ import {
   PingResponse,
 } from '@jong-hong/grpc/nestjs/proto/booking/health';
 
-@Controller('health')
+@Controller()
 @BookingHealthServiceControllerMethods()
 export class HealthController implements BookingHealthServiceController {
   ping(request: PingRequest): PingResponse {

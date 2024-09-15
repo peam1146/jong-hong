@@ -10,9 +10,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.connectMicroservice<MicroserviceOptions>({
     options: {
-      url: process.env.BOOKING_GRPC_URL,
+      url: 'localhost:50051',
       package: 'booking',
-      protoPath: join(__dirname, process.env.BOOKING_GRPC_PROTO_PATH),
+      protoPath: join(
+        __dirname,
+        '../../packages/grpc/proto/booking/health.proto',
+      ),
     },
   });
 
