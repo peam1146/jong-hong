@@ -4,12 +4,9 @@ import { HealthService } from './health.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { BOOKING_HEALTH_SERVICE_NAME } from '@jong-hong/grpc/nestjs/proto/booking/health';
 import { join } from 'path';
+import { environment } from 'src/enviroment';
 
 const __dirname = process.cwd();
-console.log(
-  'BOOKING_GRPC_PROTO_PATH',
-  process.env.VITE_BOOKING_GRPC_PROTO_PATH,
-);
 
 @Module({
   imports: [
@@ -18,7 +15,7 @@ console.log(
         name: BOOKING_HEALTH_SERVICE_NAME,
         transport: Transport.GRPC,
         options: {
-          url: 'localhost:50051',
+          url: environment.BOOKING_GRPC_URL,
           package: 'booking',
           protoPath: join(
             __dirname,
