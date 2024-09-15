@@ -3,5 +3,10 @@ import NestPlugin from './index.plugin';
 
 export default defineConfig({
   plugins: [NestPlugin()],
-  envDir: '.',
+  compilation: {
+    output: {
+      format: 'esm',
+      targetEnv: 'node-next',
+    },
+  },
 });

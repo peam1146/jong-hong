@@ -22,4 +22,5 @@ async function bootstrap() {
 
   await app.listen(environment.PORT);
 }
-bootstrap();
+
+if (process.env.IS_BUILDING !== 'true') bootstrap();

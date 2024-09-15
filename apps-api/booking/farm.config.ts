@@ -3,6 +3,12 @@ import NestPlugin from './index.plugin';
 
 export default defineConfig({
   plugins: [NestPlugin()],
+  compilation: {
+    output: {
+      format: 'esm',
+      targetEnv: 'node-next',
+    },
+  },
   server: {
     port: 50052,
   },

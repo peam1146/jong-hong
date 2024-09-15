@@ -20,4 +20,4 @@ async function bootstrap() {
   });
   app.listen();
 }
-bootstrap();
+if (process.env.IS_BUILDING !== 'true') bootstrap();
