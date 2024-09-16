@@ -1,0 +1,1 @@
+module.exports = require('@jong-hong/project-config/prettier/base')

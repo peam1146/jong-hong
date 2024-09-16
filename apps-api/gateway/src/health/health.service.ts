@@ -1,8 +1,8 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import {
   BOOKING_HEALTH_SERVICE_NAME,
   BookingHealthServiceClient,
 } from '@jong-hong/grpc/nestjs/proto/booking/health';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 

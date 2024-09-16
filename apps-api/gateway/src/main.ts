@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-
-import { AppModule } from './app.module';
 import { MicroserviceOptions } from '@nestjs/microservices';
 import { join } from 'path';
+
+import { AppModule } from './app.module';
 import { environment } from './enviroment';
 
 const __dirname = process.cwd();

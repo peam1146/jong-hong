@@ -1,9 +1,11 @@
+import { BOOKING_HEALTH_SERVICE_NAME } from '@jong-hong/grpc/nestjs/proto/booking/health';
 import { Module } from '@nestjs/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { join } from 'path';
+
 import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { BOOKING_HEALTH_SERVICE_NAME } from '@jong-hong/grpc/nestjs/proto/booking/health';
-import { join } from 'path';
+
 import { environment } from '../enviroment';
 
 const __dirname = process.cwd();

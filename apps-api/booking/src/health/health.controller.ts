@@ -1,10 +1,10 @@
-import { Controller } from '@nestjs/common';
 import {
   BookingHealthServiceController,
   BookingHealthServiceControllerMethods,
   PingRequest,
   PingResponse,
 } from '@jong-hong/grpc/nestjs/proto/booking/health';
+import { Controller } from '@nestjs/common';
 
 @Controller()
 @BookingHealthServiceControllerMethods()

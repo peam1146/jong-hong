@@ -1,0 +1,22 @@
+{
+  "folders": [
+    {
+      "name": "root",
+      "path": ".",
+    },
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "javascript.preferences.importModuleSpecifier": "shortest",
+    "typescript.format.enable": true,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "tailwindCSS.experimental.classRegex": [
+      "cn\\(([^)]*)\\)",
+      "cva\\(([^)]*)\\)",
+    ],
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+    },
+  },
+}
