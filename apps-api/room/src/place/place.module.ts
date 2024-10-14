@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { PlaceController } from './place.controller';
 import { PlaceService } from './place.service';
-import { DatabaseService } from '../database/database.service';
 
 @Module({
   controllers: [PlaceController],
-  providers: [PlaceService, DatabaseService],
+  providers: [PlaceService]
 })
 export class PlaceModule {}

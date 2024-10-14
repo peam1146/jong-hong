@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { RedisService } from './redis.service';
+import { RedisController } from './redis.controller';
 
 import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
-import { environment } from '../enviroment';
 
 @Module({
   imports: [
@@ -11,9 +11,10 @@ import { environment } from '../enviroment';
       store: redisStore,
       isGlobal: true,
       host: 'localhost',
-      port: environment.REDIS_PORT,
+      port: 6379,
     }),
   ],
   providers: [RedisService],
+  controllers: [RedisController],
 })
 export class RedisModule {}

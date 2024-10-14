@@ -10,19 +10,15 @@ datasource db {
 model Place {
   id          String  @id @default(uuid())
   name        String  @db.VarChar(255)
-  open        String 
-  close       String  
   rooms       Room[]
 }
 
 model Room {
-  id          String   @id @default(uuid())
-  name        String   @db.VarChar(255)
-  placeId     String   
-  minCapacity Int
-  maxCapacity Int
-  available    Boolean  @default(true)
-  place       Place @relation(fields: [placeId], references: [id])
+  id         String   @id @default(uuid())
+  name       String   @db.VarChar(255)
+  placeId    String   
+  capacity   Int      
+  place      Place @relation(fields: [placeId], references: [id])
 
   @@index([placeId])
 }

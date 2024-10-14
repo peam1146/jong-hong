@@ -40,5 +40,7 @@ async function bootstrap() {
   });
 
   await app.startAllMicroservices();
+
+  // await app.listen(8000);
 }
 if (process.env.IS_BUILDING !== 'true') bootstrap();

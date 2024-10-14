@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { KafkaService } from './kafka.service';
-import { environment } from '../enviroment';
+import { ProducerService } from './producer.service';
+import { KafkaController } from './kafka.controller';
 
 @Module({
   imports: [
@@ -11,7 +11,7 @@ import { environment } from '../enviroment';
         transport: Transport.KAFKA,
         options: {
           client: {
-            brokers: [environment.KAFKA_URL],
+            brokers: ['localhost:9092'],
           },
           consumer: {
             groupId: 'auth-service',
@@ -20,7 +20,8 @@ import { environment } from '../enviroment';
       },
     ]),
   ],
-  providers: [KafkaService],
-  exports: [KafkaService],
+  providers: [ProducerService],
+  controllers: [KafkaController],
+  exports: [ProducerService],
 })
 export class KafkaModule {}

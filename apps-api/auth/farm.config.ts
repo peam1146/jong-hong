@@ -10,6 +10,6 @@ export default defineConfig({
     },
   },
   server: {
-    port: 40052,
+    port: 50052,
   },
 });
