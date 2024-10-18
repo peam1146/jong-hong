@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package room;
+
+import "google/protobuf/empty.proto";
+
+service PlaceService {
+  rpc CreatePlace(CreatePlaceRequest) returns (PlaceResponse);
+  rpc GetPlace(GetPlaceRequest) returns (GetPlaceResponse);
+  rpc GetAllPlaces(google.protobuf.Empty) returns (GetAllPlaceResponse);
+  rpc UpdatePlace(UpdatePlaceRequest) returns (PlaceResponse);
+  rpc DeletePlace(DeletePlaceRequest) returns (google.protobuf.Empty);
+}
+
+message CreatePlaceRequest {
+  string name = 1;
+  string open = 2;
+  string close = 3;
+}
+
+message GetPlaceRequest {
+   string id = 1;
+}
+
+message PlaceResponse {
+  string id = 1;
+  string name = 2;
+  string open = 3;
+  string close = 4;
+}
+
+message GetPlaceResponse {
+  string id = 1;
+  string name = 2;
+  string open = 3;
+  string close = 4;
+  int32 availableCount = 5;
+}
+
+message GetAllPlaceResponse {
+  repeated GetPlaceResponse places = 1;
+}
+
+message UpdatePlaceRequest {
+    string id = 1;
+    optional string name = 2;
+    optional string open = 3;
+    optional string close = 4;
+}
+
+message DeletePlaceRequest {
+    string id = 1;
+}
+
