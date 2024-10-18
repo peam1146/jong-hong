@@ -18,11 +18,11 @@ async function bootstrap() {
     transport: Transport.GRPC,
     options: {
       url: `127.0.0.1:${environment.PORT}`,
-      package: 'booking',
-      protoPath: join(
-        __dirname,
-        '../../packages/grpc/proto/booking/health.proto',
-      ),
+      package: 'room',
+      protoPath: [
+        join(__dirname, '../../packages/grpc/proto/auth/room.proto'),
+        join(__dirname, '../../packages/grpc/proto/auth/place.proto'),
+      ],
     },
   });
 
