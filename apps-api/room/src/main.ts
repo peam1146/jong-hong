@@ -17,12 +17,11 @@ async function bootstrap() {
   app.connectMicroservice<GrpcOptions>({
     transport: Transport.GRPC,
     options: {
-      url: `127.0.0.1:${environment.GRPC_PORT}`,
+      url: `127.0.0.1:${environment.PORT}`,
       package: 'room',
       protoPath: [
-        join(__dirname, '../../packages/grpc/proto/room/room.proto'),
-        join(__dirname, '../../packages/grpc/proto/room/place.proto'),
-        join(__dirname, '../../packages/grpc/proto/room/health.proto'),
+        join(__dirname, '../../packages/grpc/proto/auth/room.proto'),
+        join(__dirname, '../../packages/grpc/proto/auth/place.proto'),
       ],
     },
   });

@@ -4,7 +4,7 @@ import * as v from 'valibot';
 dotenv.config();
 
 export const EnvironmentSchema = v.object({
-  GRPC_PORT: v.string(),
+  PORT: v.string(),
   DATABASE_URL: v.string(),
   KAFKA_URL: v.string(),
 });
