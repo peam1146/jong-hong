@@ -1,46 +1,141 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Controller } from '@nestjs/common';
 import { RoomService } from './room.service';
+import {
+  RoomServiceController,
+  RoomServiceControllerMethods,
+  RoomResponse,
+  CreateRoomRequest,
+  RoomsResponse,
+  GetRoomRequest,
+  DeleteRoomRequest,
+  UpdateRoomRequest,
+  GetAllRoomsRequest,
+} from '@jong-hong/grpc/nestjs/proto/room/room';
+import { EventPattern, Payload, RpcException } from '@nestjs/microservices';
+import { Empty } from '@jong-hong/grpc/nestjs/google/protobuf/empty';
+import { validateDateFormat, validateTimeFormat } from '../utils/validate.util';
 
-@Controller('room')
-export class RoomController {
+@Controller()
+@RoomServiceControllerMethods()
+export class RoomController implements RoomServiceController {
   constructor(private readonly roomService: RoomService) {}
 
-  // Create a Room
-  @Post()
-  create(@Body() data: Prisma.RoomCreateInput) {
-    return this.roomService.create(data);
+  async createRoom(request: CreateRoomRequest): Promise<RoomResponse> {
+    if ((request.name = ''))
+      throw new RpcException({ code: 400, message: 'Name is required.' });
+
+    if ((request.placeId = ''))
+      throw new RpcException({ code: 400, message: 'PlaceId is required.' });
+
+    if (
+      request.maxCapacity < request.minCapacity ||
+      request.maxCapacity <= 0 ||
+      request.minCapacity <= 0
+    )
+      throw new RpcException({
+        code: 400,
+        message:
+          'Invalid capacity condition (capacity must be positive and max max should be greater than min min)',
+      });
+
+    return await this.roomService.createRoom(request);
   }
 
-  // Get all Rooms
-  @Get()
-  findAll() {
-    return this.roomService.findAtAll();
+  async getRoom(request: GetRoomRequest): Promise<RoomResponse> {
+    if ((request.id = ''))
+      throw new RpcException({ code: 400, message: 'Id is required.' });
+
+    return await this.roomService.getRoom(request);
   }
 
-  // Get a Room by ID
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.roomService.findOne(id);
+  async getAllRooms(request: GetAllRoomsRequest): Promise<RoomsResponse> {
+    if (request.date != null && !validateDateFormat(request.date))
+      throw new RpcException({
+        code: 400,
+        message: 'Invalid date format (DD/MM/YY)',
+      });
+
+    if (
+      (request.startTime != null && !validateTimeFormat(request.startTime)) ||
+      (request.endTime != null && !validateTimeFormat(request.endTime))
+    )
+      throw new RpcException({
+        code: 400,
+        message: 'Invalid time format (HH:MM AM/HH:MM PM)',
+      });
+
+    if (request.peopleCount != null && request.peopleCount <= 0)
+      throw new RpcException({
+        code: 400,
+        message: 'Number of people must be positive number',
+      });
+
+    return await this.roomService.getAllRooms(request);
   }
 
-  // Update a Room by ID
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() data: Prisma.RoomUpdateInput) {
-    return this.roomService.update(id, data);
+  async updateRoom(request: UpdateRoomRequest): Promise<RoomResponse> {
+    if ((request.id = ''))
+      throw new RpcException({ code: 400, message: 'Id is required' });
+
+    if (
+      (request.maxCapacity != null &&
+        request.minCapacity != null &&
+        request.maxCapacity < request.minCapacity) ||
+      (request.maxCapacity != null && request.maxCapacity <= 0) ||
+      (request.minCapacity != null && request.minCapacity <= 0)
+    ) {
+      throw new RpcException({
+        code: 400,
+        message:
+          'Invalid capacity condition (capacity must be positive and max should be greater than min when both are provided)',
+      });
+    }
+    return await this.roomService.updateRoom(request);
   }
 
-  // Delete a Room by ID
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.roomService.remove(id);
+  async deleteRoom(request: DeleteRoomRequest): Promise<Empty> {
+    if ((request.id = ''))
+      throw new RpcException({ code: 400, message: 'Id is required.' });
+    return await this.roomService.deleteRoom(request);
+  }
+
+  @EventPattern('check-in')
+  async handleCheckIn(@Payload() message: { roomId: string }) {
+    try {
+      const roomId = message.roomId;
+
+      // Call the service to update the room's availability
+      await this.roomService.updateRoom({
+        id: roomId,
+        available: false, // Set room to unavailable
+      });
+
+      console.log(
+        `Room ${roomId} has been checked in and marked as unavailable.`,
+      );
+    } catch (error) {
+      console.error(`Failed to check in room: ${error.message}`);
+      throw new Error('Room check-in failed');
+    }
+  }
+
+  @EventPattern('check-out')
+  async handleCheckOut(@Payload() message: { roomId: string }) {
+    try {
+      const roomId = message.roomId;
+
+      // Call the service to update the room's availability
+      await this.roomService.updateRoom({
+        id: roomId,
+        available: true, // Set room to unavailable
+      });
+
+      console.log(
+        `Room ${roomId} has been checked out and marked as available.`,
+      );
+    } catch (error) {
+      console.error(`Failed to check in room: ${error.message}`);
+      throw new Error('Room check-out failed');
+    }
   }
 }

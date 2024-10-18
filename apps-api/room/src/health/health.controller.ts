@@ -1,14 +1,14 @@
 import {
-  BookingHealthServiceController,
-  BookingHealthServiceControllerMethods,
+  RoomHealthServiceController,
   PingRequest,
   PingResponse,
-} from '@jong-hong/grpc/nestjs/proto/booking/health';
+  RoomHealthServiceControllerMethods,
+} from '@jong-hong/grpc/nestjs/proto/room/health';
 import { Controller } from '@nestjs/common';
 
 @Controller()
-@BookingHealthServiceControllerMethods()
-export class HealthController implements BookingHealthServiceController {
+@RoomHealthServiceControllerMethods()
+export class HealthController implements RoomHealthServiceController {
   ping(request: PingRequest): PingResponse {
     return {
       message: request.message,

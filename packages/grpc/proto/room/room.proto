@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package room;
+
+import "google/protobuf/empty.proto";
+
+service RoomService {
+  rpc CreateRoom(CreateRoomRequest) returns (RoomResponse);
+  rpc GetRoom(GetRoomRequest) returns (RoomResponse);
+  rpc GetAllRooms(GetAllRoomsRequest) returns (RoomsResponse);
+  rpc UpdateRoom(UpdateRoomRequest) returns (RoomResponse);
+  rpc DeleteRoom(DeleteRoomRequest) returns (google.protobuf.Empty);
+}
+
+message CreateRoomRequest {
+  string name = 1;
+  int32 minCapacity = 2;
+  int32 maxCapacity = 3;
+  string placeId = 4;
+}
+
+message GetRoomRequest {
+    string id = 1;               
+}
+
+message GetAllRoomsRequest {
+    optional string placeId = 2;              
+    optional int32  peopleCount = 3;     
+    optional string date = 4;                
+    optional string startTime = 5;           
+    optional string endTime = 6;           
+}
+
+message RoomResponse {
+  string id = 1;
+  string name = 2;
+  int32 minCapacity = 3;
+  int32 maxCapacity = 4;
+  string placeId = 5;
+  bool available=6;
+}
+ 
+
+message RoomsResponse {
+  repeated RoomResponse rooms = 1;
+}
+
+message UpdateRoomRequest {
+  string id = 1;
+  optional  string name = 2;
+  optional  int32 minCapacity = 3;
+  optional  int32 maxCapacity = 4;
+  optional  string placeId = 5;
+  optional  bool available=6;
+}
+
+message DeleteRoomRequest {
+    string id = 1;
+}
+
