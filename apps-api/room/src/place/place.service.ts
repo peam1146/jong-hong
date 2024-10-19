@@ -18,11 +18,13 @@ export class PlaceService {
 
   async createPlace(request: CreatePlaceRequest): Promise<PlaceResponse> {
     try {
+      const { name, open, close } = request;
+
       const place = await this.prisma.place.create({
         data: {
-          name: request.name,
-          open: request.open,
-          close: request.close,
+          name,
+          open,
+          close,
         },
       });
 
@@ -35,7 +37,6 @@ export class PlaceService {
     }
   }
 
-  // Get a specific place by ID
   async getPlace(request: GetPlaceRequest): Promise<GetPlaceResponse> {
     try {
       const place = await this.getPlaceWithAvailableCount(request.id);
@@ -53,7 +54,6 @@ export class PlaceService {
     }
   }
 
-  // Get all places
   async getAllPlaces(): Promise<GetAllPlaceResponse> {
     try {
       const places = await this.prisma.place.findMany();
@@ -73,15 +73,16 @@ export class PlaceService {
     }
   }
 
-  // Update a place
   async updatePlace(request: UpdatePlaceRequest): Promise<PlaceResponse> {
     try {
+      const { id, name, open, close } = request;
+
       const place = await this.prisma.place.update({
-        where: { id: request.id },
+        where: { id },
         data: {
-          name: request.name || undefined,
-          open: request.open || undefined,
-          close: request.close || undefined,
+          name: name || undefined,
+          open: open || undefined,
+          close: close || undefined,
         },
       });
 
@@ -94,11 +95,12 @@ export class PlaceService {
     }
   }
 
-  // Delete a place
   async deletePlace(request: DeletePlaceRequest): Promise<Empty> {
     try {
+      const { id } = request;
+
       await this.prisma.place.delete({
-        where: { id: request.id },
+        where: { id },
       });
 
       return {};
@@ -110,7 +112,6 @@ export class PlaceService {
     }
   }
 
-  // Helper method to get a place with available room count
   private async getPlaceWithAvailableCount(
     placeId: string,
   ): Promise<GetPlaceResponse> {
@@ -122,7 +123,6 @@ export class PlaceService {
       throw new RpcException({ code: 404, message: 'Place not found' });
     }
 
-    // Count the number of rooms with available: true
     const availableRoomCount = await this.prisma.room.count({
       where: {
         placeId: place.id,
