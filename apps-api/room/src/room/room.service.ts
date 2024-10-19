@@ -19,7 +19,6 @@ export class RoomService {
   async createRoom(request: CreateRoomRequest): Promise<RoomResponse> {
     try {
       const { name, minCapacity, maxCapacity, placeId } = request;
-
       // Creating a new room in the database
       const room = await this.prisma.room.create({
         data: {
@@ -42,9 +41,10 @@ export class RoomService {
   // Fetch a single room by ID
   async getRoom(request: GetRoomRequest): Promise<RoomResponse> {
     try {
+      const { id } = request;
       const room = await this.prisma.room.findUnique({
         where: {
-          id: request.id,
+          id,
         },
       });
 
@@ -94,15 +94,16 @@ export class RoomService {
 
   // Update an existing room
   async updateRoom(request: UpdateRoomRequest): Promise<RoomResponse> {
+    const { id, name, minCapacity, maxCapacity, placeId, available } = request;
     try {
       const updatedRoom = await this.prisma.room.update({
-        where: { id: request.id },
+        where: { id },
         data: {
-          name: request.name || undefined,
-          minCapacity: request.minCapacity || undefined,
-          maxCapacity: request.maxCapacity || undefined,
-          placeId: request.placeId || undefined,
-          available: request.available || undefined,
+          name,
+          minCapacity,
+          maxCapacity,
+          placeId,
+          available,
         },
       });
 
