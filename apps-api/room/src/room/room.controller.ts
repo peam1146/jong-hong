@@ -21,10 +21,10 @@ export class RoomController implements RoomServiceController {
   constructor(private readonly roomService: RoomService) {}
 
   async createRoom(request: CreateRoomRequest): Promise<RoomResponse> {
-    if ((request.name = ''))
+    if (!request.name)
       throw new RpcException({ code: 400, message: 'Name is required.' });
 
-    if ((request.placeId = ''))
+    if (!request.placeId)
       throw new RpcException({ code: 400, message: 'PlaceId is required.' });
 
     if (
@@ -42,7 +42,7 @@ export class RoomController implements RoomServiceController {
   }
 
   async getRoom(request: GetRoomRequest): Promise<RoomResponse> {
-    if ((request.id = ''))
+    if (!request.id)
       throw new RpcException({ code: 400, message: 'Id is required.' });
 
     return await this.roomService.getRoom(request);
@@ -74,15 +74,31 @@ export class RoomController implements RoomServiceController {
   }
 
   async updateRoom(request: UpdateRoomRequest): Promise<RoomResponse> {
-    if ((request.id = ''))
+    if (!request.id)
       throw new RpcException({ code: 400, message: 'Id is required' });
 
+    const existingRoom = await this.getRoom({ id: request.id });
+
+    if (!existingRoom) {
+      throw new RpcException({ code: 404, message: 'Room not found' });
+    }
+
+    const updatedRoomData = {
+      id: request.id,
+      name: request.name ?? existingRoom.name,
+      minCapacity: request.minCapacity ?? existingRoom.minCapacity,
+      maxCapacity: request.maxCapacity ?? existingRoom.maxCapacity,
+      placeId: request.placeId ?? existingRoom.placeId,
+      available:
+        request.available !== undefined
+          ? request.available
+          : existingRoom.available,
+    };
+
     if (
-      (request.maxCapacity != null &&
-        request.minCapacity != null &&
-        request.maxCapacity < request.minCapacity) ||
-      (request.maxCapacity != null && request.maxCapacity <= 0) ||
-      (request.minCapacity != null && request.minCapacity <= 0)
+      updatedRoomData.maxCapacity < updatedRoomData.minCapacity ||
+      updatedRoomData.maxCapacity <= 0 ||
+      updatedRoomData.minCapacity <= 0
     ) {
       throw new RpcException({
         code: 400,
@@ -90,11 +106,11 @@ export class RoomController implements RoomServiceController {
           'Invalid capacity condition (capacity must be positive and max should be greater than min when both are provided)',
       });
     }
-    return await this.roomService.updateRoom(request);
+    return await this.roomService.updateRoom(updatedRoomData);
   }
 
   async deleteRoom(request: DeleteRoomRequest): Promise<Empty> {
-    if ((request.id = ''))
+    if (!request.id)
       throw new RpcException({ code: 400, message: 'Id is required.' });
     return await this.roomService.deleteRoom(request);
   }
