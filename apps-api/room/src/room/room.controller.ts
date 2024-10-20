@@ -49,15 +49,15 @@ export class RoomController implements RoomServiceController {
   }
 
   async getAllRooms(request: GetAllRoomsRequest): Promise<RoomsResponse> {
-    if (request.date != null && !validateDateFormat(request.date))
+    if (!request.date && !validateDateFormat(request.date))
       throw new RpcException({
         code: 400,
         message: 'Invalid date format (DD/MM/YY)',
       });
 
     if (
-      (request.startTime != null && !validateTimeFormat(request.startTime)) ||
-      (request.endTime != null && !validateTimeFormat(request.endTime))
+      (!request.startTime && !validateTimeFormat(request.startTime)) ||
+      (!request.endTime && !validateTimeFormat(request.endTime))
     )
       throw new RpcException({
         code: 400,

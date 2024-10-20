@@ -64,18 +64,19 @@ export class RoomService {
   // Fetch all rooms (filtered by optional parameters)
   async getAllRooms(request: any): Promise<RoomsResponse> {
     try {
-      const { placeId, peopleCount, date, startTime, endTime } = request;
+      const { placeId, peopleCount, available, date, startTime, endTime } =
+        request;
 
       const rooms = await this.prisma.room.findMany({
         where: {
-          placeId: placeId || undefined,
-          available: true,
+          placeId: placeId !== undefined ? placeId : undefined,
+          available: available !== undefined ? available : undefined,
           AND: {
             minCapacity: {
-              lte: peopleCount || undefined,
+              lte: peopleCount !== undefined ? peopleCount : undefined,
             },
             maxCapacity: {
-              gte: peopleCount || undefined,
+              gte: peopleCount !== undefined ? peopleCount : undefined,
             },
           },
         },
