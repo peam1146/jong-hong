@@ -17,11 +17,12 @@ async function bootstrap() {
   app.connectMicroservice<GrpcOptions>({
     transport: Transport.GRPC,
     options: {
-      url: `127.0.0.1:${environment.PORT}`,
+      url: `127.0.0.1:${environment.GRPC_PORT}`,
       package: 'room',
       protoPath: [
-        join(__dirname, '../../packages/grpc/proto/auth/room.proto'),
-        join(__dirname, '../../packages/grpc/proto/auth/place.proto'),
+        join(__dirname, '../../packages/grpc/proto/room/room.proto'),
+        join(__dirname, '../../packages/grpc/proto/room/place.proto'),
+        join(__dirname, '../../packages/grpc/proto/room/health.proto'),
       ],
     },
   });
@@ -39,7 +40,5 @@ async function bootstrap() {
   });
 
   await app.startAllMicroservices();
-
-  // await app.listen(8000);
 }
 if (process.env.IS_BUILDING !== 'true') bootstrap();
