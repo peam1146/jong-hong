@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 
 @Injectable()
-export class ProducerService {
+export class KafkaService {
   constructor(
     @Inject('auth-service') private readonly clientKafka: ClientKafka,
   ) {}
