@@ -7,10 +7,6 @@ import { PassportModule } from '@nestjs/passport';
 import { environment } from '../enviroment';
 import { RedisService } from '../redis/redis.service';
 import { KafkaModule } from '../kafka/kafka.module';
-import { UserService } from '../user/user.service';
-import { UserModule } from '../user/user.module';
-import { RedisModule } from '../redis/redis.module';
-import { JWTAuthGuard } from './guards/auth.guard';
 
 @Module({
   imports: [
@@ -20,11 +16,10 @@ import { JWTAuthGuard } from './guards/auth.guard';
         expiresIn: environment.JWT_EXPIRE_IN,
       },
     }),
-    UserModule,
     PassportModule,
     KafkaModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy, JWTAuthGuard, RedisService],
+  providers: [AuthService, GoogleStrategy, RedisService],
 })
 export class AuthModule {}
