@@ -13,10 +13,10 @@ service RoomService {
 }
 
 message CreateRoomRequest {
-  string name = 1;
-  int32 minCapacity = 2;
-  int32 maxCapacity = 3;
-  string placeId = 4;
+  string  name = 1;
+  int32   minCapacity = 2;
+  int32   maxCapacity = 3;
+  string  placeId = 4;
 }
 
 message GetRoomRequest {
@@ -24,20 +24,21 @@ message GetRoomRequest {
 }
 
 message GetAllRoomsRequest {
-    optional string placeId = 2;              
-    optional int32  peopleCount = 3;     
+    optional string placeId = 1;    
+    optional bool   available = 2;          
+    optional int32  peopleCount = 3;
     optional string date = 4;                
     optional string startTime = 5;           
     optional string endTime = 6;           
 }
 
 message RoomResponse {
-  string id = 1;
-  string name = 2;
-  int32 minCapacity = 3;
-  int32 maxCapacity = 4;
-  string placeId = 5;
-  bool available=6;
+  string  id = 1;
+  string  name = 2;
+  int32   minCapacity = 3;
+  int32   maxCapacity = 4;
+  string  placeId = 5;
+  bool    available=6;
 }
  
 
@@ -46,7 +47,7 @@ message RoomsResponse {
 }
 
 message UpdateRoomRequest {
-  string id = 1;
+  string  id = 1;
   optional  string name = 2;
   optional  int32 minCapacity = 3;
   optional  int32 maxCapacity = 4;
@@ -55,6 +56,6 @@ message UpdateRoomRequest {
 }
 
 message DeleteRoomRequest {
-    string id = 1;
+  string id = 1;
 }
 
