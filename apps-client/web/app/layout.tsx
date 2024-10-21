@@ -1,15 +1,11 @@
 import './globals.css'
 
+import { Toaster } from '@/components/ui/toaster'
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 
-const geistSans = localFont({
-  src: './fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-})
-const geistMono = localFont({
-  src: './fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
+const visby = localFont({
+  src: './fonts/Visby Round CF Bold.woff2',
 })
 
 export const metadata: Metadata = {
@@ -24,7 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>{children}</body>
+      <body className={`${visby.className}`}>
+        {children} <Toaster />
+      </body>
     </html>
   )
 }
