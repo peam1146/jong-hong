@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package booking;
+
+import "google/protobuf/empty.proto";
+
+message BookingRequest {
+    string room_id = 1;
+    string user_id = 2;
+    string check_in = 3;
+    string check_out = 4;
+}
+
+message BookingResponse {
+    string booking_id = 1;
+}
+
+message CancelBookingRequest {
+    string booking_id = 1;
+}
+
+message GetUserBookingsRequest {
+    string user_id = 1;
+}
+
+message GetUserBookingsResponse {
+    message Booking {
+        string booking_id = 1;
+        string room_id = 2;
+        string check_in = 3;
+        string check_out = 4;
+    }
+    repeated Booking bookings = 1;
+}
+
+message GetRoomBookingsRequest {
+    string room_id = 1;
+}
+
+message GetRoomBookingsResponse {
+    message Booking {
+        string booking_id = 1;
+        string user_id = 2;
+        string check_in = 3;
+        string check_out = 4;
+    }
+    repeated Booking bookings = 1;
+}
+
+message GetRoomDetailsRequest {
+    string room_id = 1;
+}
+
+message GetRoomDetailsResponse {
+    message Slot {
+        string start_time = 1;
+        string end_time = 2;
+        uint32 booked = 3;
+        uint32 available = 4;
+    }
+    repeated Slot slots = 1;
+    string room_id = 2;
+    uint32 capacity = 3;
+    string open_time = 4;
+    string close_time = 5;
+}
+
+service BookingReserveService {
+  rpc Booking(BookingRequest) returns (BookingResponse) {}
+  rpc CancelReserve(CancelBookingRequest) returns (google.protobuf.Empty) {}
+  rpc GetUserBookings(GetUserBookingsRequest) returns (GetUserBookingsResponse) {}
+  rpc GetRoomBookings(GetRoomBookingsRequest) returns (GetRoomBookingsResponse) {}
+  rpc GetRoomDetails(GetRoomDetailsRequest) returns (GetRoomDetailsResponse) {}
+}

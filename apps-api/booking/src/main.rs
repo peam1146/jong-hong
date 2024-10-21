@@ -1,38 +1,36 @@
-use std::sync::atomic::{AtomicU32, Ordering};
-use std::sync::Arc;
-
-use booking::booking_health_service_server::{BookingHealthService,BookingHealthServiceServer};
-use booking::{PingRequest, PingResponse};
+use booking::booking_health_service_server::{BookingHealthService, BookingHealthServiceServer};
+use booking::booking_reserve_service_server::{BookingReserveService, BookingReserveServiceServer};
+use booking::{BookingRequest, BookingResponse, PingRequest, PingResponse};
 use tonic::{transport::Server, Request, Response, Status};
 pub mod booking {
-    tonic::include_proto!("booking"); // The string specified here must match the proto package name
+    tonic::include_proto!("health"); // The string specified here must match the proto package name
+    tonic::include_proto!("booking");
 }
 
 #[derive(Default, Debug)]
-struct BookingHealthServiceServerImpl {
-    counter: Arc<AtomicU32>,
-}
+struct BookingHealthServiceServerImpl {}
 
 #[tonic::async_trait]
 impl BookingHealthService for BookingHealthServiceServerImpl {
-    async fn ping(
+    async fn ping(&self, request: Request<PingRequest>) -> Result<Response<PingResponse>, Status> {
+        Ok(Response::new(PingResponse {
+            message: format!("Hello, {}!", request.into_inner().message),
+        }))
+    }
+}
+
+#[derive(Default, Debug)]
+struct BookingReserveServiceImpl {}
+
+#[tonic::async_trait]
+impl BookingReserveService for BookingReserveServiceImpl {
+    async fn booking(
         &self,
-        request: Request<PingRequest>,
-    ) -> Result<Response<PingResponse>, Status> {
-        println!("Got a request: {:?}", request);
-
-        // let counter =  match self.counter.lock() {
-        //     Ok(c) => c,
-        //     Err(_) => return Err(Status::internal("Failed to lock counter")),
-        // };
-
-        self.counter.fetch_add(1, Ordering::Relaxed);
-
-        let response = PingResponse{
-            message: format!("Hello, {}!, with counte: {}!", request.into_inner().message, self.counter.load(Ordering::Relaxed)),
-        };
-
-        Ok(Response::new(response))
+        request: Request<BookingRequest>,
+    ) -> Result<Response<BookingResponse>, Status> {
+        Ok(Response::new(BookingResponse {
+            booking_id: String::from("1"),
+        }))
     }
 }
 
