@@ -9,11 +9,9 @@ import {
 import { environment } from './enviroment';
 import cookieParser from 'cookie-parser';
 
-
 const __dirname = process.cwd();
 
 async function bootstrap() {
-
   const app = await NestFactory.create(AppModule);
 
   app.connectMicroservice<KafkaOptions>({
