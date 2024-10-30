@@ -10,8 +10,8 @@ const (
 )
 
 type Notification struct {
-	Id       string           `json:"id"`
 	Type     NotificationType `json:"type"`
 	UserId   string           `json:"userId"`
+	RoomId   string           `json:"roomId"`
 	CreateAt string           `json:"CreateAt"`
 }

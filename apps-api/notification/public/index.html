@@ -3,17 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Chat</title>
+    <title>Look what message passing</title>
 </head>
 <body>
     <h2>WebSocket Chat</h2>
     <div id="messages"></div>
-    <input id="username" type="text" placeholder="Username" />
-    <input id="message" type="text" placeholder="Message" />
-    <button onclick="sendMessage()">Send</button>
 
     <script>
-        const socket = new WebSocket('ws://localhost:3500/ws');
+        const socket = new WebSocket('ws://localhost:8000/ws/123');
 
         socket.onmessage = function(event) {
             const messages = document.getElementById('messages');
@@ -21,12 +18,6 @@
             message.textContent = event.data;
             messages.appendChild(message);
         };
-
-        function sendMessage() {
-            const username = document.getElementById('username').value;
-            const message = document.getElementById('message').value;
-            socket.send(JSON.stringify({"userId": username, "type": message, "createdAt": new Date()}));
-        }
     </script>
 </body>
 </html>

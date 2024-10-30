@@ -20,6 +20,12 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	// Retrieve userId from command-line arguments
+	if len(os.Args) < 2 {
+		log.Fatal("Usage: go run main.go <userId>")
+	}
+	userId := os.Args[1] // Get userId from the command line
+
 	messageBroker := os.Getenv("MESSAGE_BROKER_URI")
 	// Connection part
 	cfg := config.KafkaConnCfg{
@@ -29,8 +35,9 @@ func main() {
 	conn := utils.KafkaConn(cfg)
 
 	noti := models.Notification{
-		UserId:   "1",
-		Type:     "Hello, WebSocket!",
+		UserId:   userId,
+		RoomId:   "1",
+		Type:     models.BeforeCheckin,
 		CreateAt: time.Now().String(),
 	}
 

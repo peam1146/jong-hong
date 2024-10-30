@@ -15,7 +15,6 @@ import (
 	"jong-hong/notification/pkg/utils"
 
 	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -63,10 +62,10 @@ func main() {
 		defer wg.Done()
 
 		// uncomment this if you want to test the WebSocket server
-		// fs := http.FileServer(http.Dir("./public"))
-		// http.Handle("/", fs)
+		fs := http.FileServer(http.Dir("./public"))
+		http.Handle("/", fs)
 
-		http.HandleFunc("/ws", handlers.HandleConnections)
+		http.HandleFunc("/ws/", handlers.HandleConnections)
 
 		log.Println("HTTP server started on :8000")
 		if err := http.ListenAndServe(":8000", nil); err != nil {
@@ -103,8 +102,8 @@ func main() {
 
 				// Create a message to broadcast to WebSocket clients
 				msg := models.Notification{
-					Id:       primitive.NewObjectID().Hex(), // generate a new ID
 					UserId:   noti.UserId,
+					RoomId:   noti.RoomId,
 					Type:     noti.Type,
 					CreateAt: noti.CreateAt,
 				}
