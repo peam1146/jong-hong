@@ -5,7 +5,7 @@ dotenv.config();
 
 export const EnvironmentSchema = v.object({
   PORT: v.string(),
-  KAFKA_URL: v.string(),
+  BROKER_URI: v.string(),
   GOOGLE_CLIENT_ID: v.string(),
   GOOGLE_SECRET: v.string(),
   JWT_SECRET: v.string(),

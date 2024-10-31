@@ -1,11 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {
-  GrpcOptions,
-  KafkaOptions,
-  MicroserviceOptions,
-  Transport,
-} from '@nestjs/microservices';
+import { KafkaOptions, Transport } from '@nestjs/microservices';
 import { environment } from './enviroment';
 
 const __dirname = process.cwd();
@@ -17,7 +12,7 @@ async function bootstrap() {
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: [environment.KAFKA_URL],
+        brokers: [environment.BROKER_URI],
       },
       consumer: {
         groupId: 'auth-service',

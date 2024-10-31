@@ -11,7 +11,7 @@ import { environment } from '../enviroment';
         transport: Transport.KAFKA,
         options: {
           client: {
-            brokers: [environment.KAFKA_URL],
+            brokers: [environment.BROKER_URI],
           },
           consumer: {
             groupId: 'auth-service',

@@ -31,7 +31,7 @@ async function bootstrap() {
     transport: Transport.KAFKA,
     options: {
       client: {
-        brokers: [environment.KAFKA_URL],
+        brokers: [environment.BROKER_URL],
       },
       consumer: {
         groupId: 'room-service',
