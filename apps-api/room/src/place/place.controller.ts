@@ -13,10 +13,7 @@ import {
 } from '@jong-hong/grpc/nestjs/proto/room/place';
 import { Empty } from '@jong-hong/grpc/nestjs/google/protobuf/empty';
 import { RpcException } from '@nestjs/microservices';
-import {
-  convertTo24HourFormat,
-  validateTimeFormat,
-} from '../utils/validate.util';
+import { convertTo24HourFormat, validateTimeFormat } from '../utils/time.util';
 
 @Controller()
 @PlaceServiceControllerMethods()

@@ -8,21 +8,17 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
-import { RedisService } from '../redis/redis.service';
 import { Response } from 'express';
 import { JWTAuthGuard } from './guards/auth.guard';
-import { KafkaService } from '../kafka/kafka.service';
-import { environment } from '../enviroment';
 import { UserService } from '../user/user.service';
 import { JwtPayload } from './types/JWTpayload';
 import { User } from '../schemas/user.schema';
+import { environment } from '../enviroment';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly redisService: RedisService,
-    private readonly kafkaService: KafkaService,
     private readonly userService: UserService,
   ) {}
 
@@ -43,9 +39,6 @@ export class AuthController {
 
     const token = await this.authService.getJwtToken(payload);
 
-    // const exp = 7 * 24 * 60 * 60 * 1000;
-    // await this.redisService.set(payload.id, token, exp);
-
     const existUser = await this.userService.findById(user._id);
     if (existUser === null) {
       await this.userService.create(req.user);
@@ -53,7 +46,7 @@ export class AuthController {
 
     return res
       .status(HttpStatus.OK)
-      .redirect(`http://localhost:8000?token=${token}`);
+      .redirect(`${environment.REDIRECT_URL}?token=${token}`);
   }
 
   @Get('profile')

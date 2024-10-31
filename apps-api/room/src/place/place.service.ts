@@ -6,8 +6,8 @@ import {
   GetPlaceRequest,
   PlaceResponse,
   UpdatePlaceRequest,
+  GetPlaceResponse,
 } from '@jong-hong/grpc/nestjs/proto/room/place';
-import { GetPlaceResponse } from '@jong-hong/grpc/ts/proto/room/place';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { DatabaseService } from '../database/database.service';
