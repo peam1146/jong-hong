@@ -13,7 +13,7 @@ import {
 } from '@jong-hong/grpc/nestjs/proto/room/room';
 import { EventPattern, Payload, RpcException } from '@nestjs/microservices';
 import { Empty } from '@jong-hong/grpc/nestjs/google/protobuf/empty';
-import { validateDateFormat, validateTimeFormat } from '../utils/validate.util';
+import { validateDateFormat, validateTimeFormat } from '../utils/time.util';
 
 @Controller()
 @RoomServiceControllerMethods()
@@ -120,17 +120,11 @@ export class RoomController implements RoomServiceController {
     try {
       const roomId = message.roomId;
 
-      // Call the service to update the room's availability
       await this.roomService.updateRoom({
         id: roomId,
         available: false, // Set room to unavailable
       });
-
-      console.log(
-        `Room ${roomId} has been checked in and marked as unavailable.`,
-      );
     } catch (error) {
-      console.error(`Failed to check in room: ${error.message}`);
       throw new Error('Room check-in failed');
     }
   }
@@ -140,17 +134,11 @@ export class RoomController implements RoomServiceController {
     try {
       const roomId = message.roomId;
 
-      // Call the service to update the room's availability
       await this.roomService.updateRoom({
         id: roomId,
-        available: true, // Set room to unavailable
+        available: true,
       });
-
-      console.log(
-        `Room ${roomId} has been checked out and marked as available.`,
-      );
     } catch (error) {
-      console.error(`Failed to check in room: ${error.message}`);
       throw new Error('Room check-out failed');
     }
   }

@@ -7,7 +7,6 @@ import {
   Transport,
 } from '@nestjs/microservices';
 import { environment } from './enviroment';
-import cookieParser from 'cookie-parser';
 
 const __dirname = process.cwd();
 
@@ -25,8 +24,6 @@ async function bootstrap() {
       },
     },
   });
-
-  app.use(cookieParser());
 
   await app.startAllMicroservices();
 
