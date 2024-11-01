@@ -19,8 +19,8 @@ model Room {
   id          String   @id @default(uuid())
   name        String   @db.VarChar(255)
   placeId     String   
-  minCapacity Int
-  maxCapacity Int
+  minOccupancy Int
+  maxOccupancy Int
   available    Boolean  @default(true)
   place       Place @relation(fields: [placeId], references: [id])
 
