@@ -1,44 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import {
-  CreateRoomRequest,
-  UpdateRoomRequest,
   GetRoomRequest,
-  DeleteRoomRequest,
   RoomResponse,
   RoomsResponse,
+  UpdateAvailableRequest,
+  GetRoomByFilterRequest,
 } from '@jong-hong/grpc/nestjs/proto/room/room';
 import { DatabaseService } from '../database/database.service';
 import { RpcException } from '@nestjs/microservices';
-import { Empty } from '@jong-hong/grpc/nestjs/google/protobuf/empty';
 
 @Injectable()
 export class RoomService {
   constructor(private prisma: DatabaseService) {}
 
-  // Create a new room
-  async createRoom(request: CreateRoomRequest): Promise<RoomResponse> {
-    try {
-      const { name, minCapacity, maxCapacity, placeId } = request;
-      // Creating a new room in the database
-      const room = await this.prisma.room.create({
-        data: {
-          name,
-          minCapacity,
-          maxCapacity,
-          placeId,
-        },
-      });
-
-      return room;
-    } catch (error) {
-      throw new RpcException({
-        code: 500,
-        message: `Failed to create room: ${error.message}`,
-      });
-    }
-  }
-
-  // Fetch a single room by ID
   async getRoom(request: GetRoomRequest): Promise<RoomResponse> {
     try {
       const { id } = request;
@@ -61,21 +35,22 @@ export class RoomService {
     }
   }
 
-  // Fetch all rooms (filtered by optional parameters)
-  async getAllRooms(request: any): Promise<RoomsResponse> {
+  async getRoomByFilter(
+    request: GetRoomByFilterRequest,
+  ): Promise<RoomsResponse> {
     try {
-      const { placeId, peopleCount, available, date, startTime, endTime } =
+      const { placeId, peopleCount, date, availableFrom, availableUntil } =
         request;
 
       const rooms = await this.prisma.room.findMany({
         where: {
           placeId: placeId !== undefined ? placeId : undefined,
-          available: available !== undefined ? available : undefined,
+          available: true,
           AND: {
-            minCapacity: {
+            minOccupancy: {
               lte: peopleCount !== undefined ? peopleCount : undefined,
             },
-            maxCapacity: {
+            maxOccupancy: {
               gte: peopleCount !== undefined ? peopleCount : undefined,
             },
           },
@@ -93,17 +68,14 @@ export class RoomService {
     }
   }
 
-  // Update an existing room
-  async updateRoom(request: UpdateRoomRequest): Promise<RoomResponse> {
-    const { id, name, minCapacity, maxCapacity, placeId, available } = request;
+  async updateAvailableRoom(
+    request: UpdateAvailableRequest,
+  ): Promise<RoomResponse> {
+    const { id, available } = request;
     try {
       const updatedRoom = await this.prisma.room.update({
         where: { id },
         data: {
-          name,
-          minCapacity,
-          maxCapacity,
-          placeId,
           available,
         },
       });
@@ -113,23 +85,6 @@ export class RoomService {
       throw new RpcException({
         code: 500,
         message: `Failed to update room: ${error.message}`,
-      });
-    }
-  }
-
-  // Delete a room by ID
-  async deleteRoom(request: DeleteRoomRequest): Promise<Empty> {
-    try {
-      await this.prisma.room.delete({
-        where: {
-          id: request.id,
-        },
-      });
-      return {};
-    } catch (error) {
-      throw new RpcException({
-        code: 500,
-        message: `Failed to delete room: ${error.message}`,
       });
     }
   }

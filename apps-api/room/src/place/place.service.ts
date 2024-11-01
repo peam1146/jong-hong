@@ -1,11 +1,5 @@
-import { Empty } from '@jong-hong/grpc/nestjs/google/protobuf/empty';
 import {
-  CreatePlaceRequest,
-  DeletePlaceRequest,
   GetAllPlaceResponse,
-  GetPlaceRequest,
-  PlaceResponse,
-  UpdatePlaceRequest,
   GetPlaceResponse,
 } from '@jong-hong/grpc/nestjs/proto/room/place';
 import { Injectable } from '@nestjs/common';
@@ -15,44 +9,6 @@ import { DatabaseService } from '../database/database.service';
 @Injectable()
 export class PlaceService {
   constructor(private prisma: DatabaseService) {}
-
-  async createPlace(request: CreatePlaceRequest): Promise<PlaceResponse> {
-    try {
-      const { name, open, close } = request;
-
-      const place = await this.prisma.place.create({
-        data: {
-          name,
-          open,
-          close,
-        },
-      });
-
-      return place;
-    } catch (error) {
-      throw new RpcException({
-        code: 500,
-        message: `Error creating place: ${error.message}`,
-      });
-    }
-  }
-
-  async getPlace(request: GetPlaceRequest): Promise<GetPlaceResponse> {
-    try {
-      const place = await this.getPlaceWithAvailableCount(request.id);
-
-      if (!place) {
-        throw new RpcException({ code: 404, message: 'Place not found' });
-      }
-
-      return place;
-    } catch (error) {
-      throw new RpcException({
-        code: 500,
-        message: `Error retrieving place: ${error.message}`,
-      });
-    }
-  }
 
   async getAllPlaces(): Promise<GetAllPlaceResponse> {
     try {
@@ -69,45 +25,6 @@ export class PlaceService {
       throw new RpcException({
         code: 500,
         message: `Error retrieving places: ${error.message}`,
-      });
-    }
-  }
-
-  async updatePlace(request: UpdatePlaceRequest): Promise<PlaceResponse> {
-    try {
-      const { id, name, open, close } = request;
-
-      const place = await this.prisma.place.update({
-        where: { id },
-        data: {
-          name: name || undefined,
-          open: open || undefined,
-          close: close || undefined,
-        },
-      });
-
-      return place;
-    } catch (error) {
-      throw new RpcException({
-        code: 500,
-        message: `Error updating place: ${error.message}`,
-      });
-    }
-  }
-
-  async deletePlace(request: DeletePlaceRequest): Promise<Empty> {
-    try {
-      const { id } = request;
-
-      await this.prisma.place.delete({
-        where: { id },
-      });
-
-      return {};
-    } catch (error) {
-      throw new RpcException({
-        code: 500,
-        message: `Error deleting place: ${error.message}`,
       });
     }
   }
