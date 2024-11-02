@@ -1,0 +1,55 @@
+// protocol buffers version 3
+syntax = "proto3";
+
+// path options when file generated into golang file
+option go_package = "jong-hong/penalty/proto/penalty";
+
+// define package name or namespace
+package penalty;
+
+// Define message of protocol buffer
+// This structure Looks Like JSON
+message Meta {
+    // field named as code
+    // with datatype as int32
+    // and tag number 1, used to match fields
+    // when serialize or deserialize the data
+    int32 code = 1;
+
+    // field named as message
+    // with datatype as string
+    // and tag number 2, used to match fields
+    // when serialize or deserialize the data
+    string message = 2;
+}
+
+message PenaltyDBResponse {
+    string id = 1;
+    string user_id = 2;
+    int64 penalty_time = 3;
+    string caused_by = 4;
+    int64 created_at = 5;
+}
+
+message InsertPenaltyRequest {
+    string user_id = 1;
+    int64 penalty_time = 2;
+    string caused_by = 3;
+}
+message InsertPenaltyResponse {
+    Meta meta = 1;
+    PenaltyDBResponse data = 2;
+}
+
+message isUserPenalizedRequest {
+    string user_id = 1;
+}
+
+message isUserPenalizedResponse {
+    Meta meta = 1;
+}
+
+service PenaltyGapi {
+    rpc InsertPenalty(InsertPenaltyRequest) returns (InsertPenaltyResponse) {}
+    rpc isUserPenalized (isUserPenalizedRequest) returns (isUserPenalizedResponse) {}
+}
