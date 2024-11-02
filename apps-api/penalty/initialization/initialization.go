@@ -1,14 +1,18 @@
 package initialization
 
 import (
+	"encoding/json"
 	"fmt"
 	"jong-hong/penalty/gapi"
+	"jong-hong/penalty/model"
 	"jong-hong/penalty/proto/penalty"
 	"jong-hong/penalty/repository"
+	"log"
 	"net"
 	"os"
 	"time"
 
+	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"google.golang.org/grpc"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -59,7 +63,7 @@ func DbInit() (*gorm.DB, error) {
 // ServerInit initializes and starts the gRPC server
 func ServerInit(db *gorm.DB) error {
 	network := "tcp"
-	address := ":3000"
+	address := ":" + os.Getenv("GRPC_ADDRESS")
 	listener, err := net.Listen(network, address)
 	if err != nil {
 		return fmt.Errorf("error listening on %s: %v", address, err.Error())
@@ -79,4 +83,43 @@ func ServerInit(db *gorm.DB) error {
 	}
 
 	return nil
+}
+
+func KafkaInit(db *gorm.DB) error {
+	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
+		"bootstrap.servers": "localhost:19092",
+		"group.id":          "penalty",
+		"auto.offset.reset": "earliest",
+	})
+	if err != nil {
+		log.Fatalf("failed to create consumer: %v", err)
+	}
+
+	err = consumer.Subscribe("penalty.create", nil)
+	if err != nil {
+		log.Fatalf("failed to subscribe: %v", err)
+	}
+
+	penaltySvc := repository.NewDataPenalty(db)
+
+	log.Println("Kafka consumer is running...")
+	for {
+		msg, err := consumer.ReadMessage(-1)
+		if err == nil {
+			log.Printf("Message on %s: %s\n", msg.TopicPartition, string(msg.Value))
+
+			var penalty model.Penalty
+			if err := json.Unmarshal(msg.Value, &penalty); err != nil {
+				log.Printf("Error unmarshalling message: %v", err)
+				continue
+			}
+
+			_, err := penaltySvc.InsertPenalty(penalty)
+			if err != nil {
+				log.Printf("Error inserting penalty: %v", err)
+			}
+		} else {
+			log.Printf("Consumer error: %v\n", err)
+		}
+	}
 }
