@@ -37,7 +37,7 @@ func main() {
 	noti := models.Notification{
 		UserId:   userId,
 		RoomId:   "1",
-		Type:     models.BeforeCheckin,
+		Type:     models.NotCheckin,
 		CreateAt: time.Now().String(),
 	}
 
