@@ -30,9 +30,6 @@ export function FilterPopup({
         <AlertDialog.Content className="fixed inset-0 z-30 flex items-center justify-center p-4">
           <div className="bg-white border-2 border-black rounded-lg w-[320px] p-4 shadow-lg flex flex-col items-center gap-2">
             <AlertDialog.Title className="text-h3 font-semibold mb-2">{title}</AlertDialog.Title>
-            {/* <AlertDialog.Description className="text-gray-700 mb-4">
-              {description}
-            </AlertDialog.Description> */}
 
             <Input placeholder="Number of people" icon={<User color="black" weight="bold" />} />
             <Input type="date" placeholder="Select date" />

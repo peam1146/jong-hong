@@ -5,6 +5,7 @@ import { TimeDivider } from '@/components/ui/timeDivider'
 import { TimeBox } from '@/components/ui/timeBox'
 import { useState } from 'react'
 import { JongPopup } from '@/components/ui/jongPopup'
+
 export default function RoomDetailPage({ params }: { params: { rid: string } }) {
   const { rid } = params
   const [popupOpen, setPopupOpen] = useState(false)
@@ -22,9 +23,7 @@ export default function RoomDetailPage({ params }: { params: { rid: string } }) 
         description=""
         confirmLabel="Confirm"
         onConfirm={handleConfirm}
-      >
-        {/* Optional custom content */}
-      </JongPopup>
+      ></JongPopup>
       <div className="bg-white rounded-3xl border-black border-2 w-12 h-12 flex items-center justify-center px-2 py-2">
         <ArrowLeft size={32} weight="bold" />
       </div>
@@ -64,6 +63,3 @@ export default function RoomDetailPage({ params }: { params: { rid: string } }) 
     </div>
   )
 }
-// export async function generateStaticParams() {
-//   return [{ rid: '211' }]
-// }

@@ -4,6 +4,7 @@ import { RoomCard } from '@/components/ui/roomCard'
 import { FilterPopup } from '@/components/ui/filterPopup'
 import { useState } from 'react'
 import Link from 'next/link'
+
 export default function PlaceDetailPage({ params }: { params: { pid: string } }) {
   const [popupOpen, setPopupOpen] = useState(false)
 
@@ -59,7 +60,3 @@ export default function PlaceDetailPage({ params }: { params: { pid: string } })
     </div>
   )
 }
-
-// export async function generateStaticParams() {
-//   return [{ pid: '6547ba1eef37aee7edf3f6fe' }]
-// }
