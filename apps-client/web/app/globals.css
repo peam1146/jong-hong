@@ -4,9 +4,28 @@
 
 html,
 body {
-  max-width: 100vw;
+  /* max-width: 100vw; */
   overflow-x: hidden;
   font-family: 'Visby Round CF Bold';
+  /* margin-top: 16px;
+  margin-bottom: 80px;
+  margin-right: 16px;
+  margin-left: 16px; */
+  padding: 0;
+  width: 100%;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#app-container {
+  max-width: 400px; /* Mobile width */
+  width: 100%; /* Allows responsive behavior on mobile */
+  padding: 16px;
+  /* margin-left: auto;
+  margin-right: auto; */
+
+  /* Centers on larger screens */
 }
 
 * {
