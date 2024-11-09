@@ -9,7 +9,6 @@ export default function PlaceDetailPage({ params }: { params: { pid: string } })
   const [popupOpen, setPopupOpen] = useState(false)
 
   const handleConfirm = () => {
-    console.log('Confirmed!')
     setPopupOpen(false)
   }
 
