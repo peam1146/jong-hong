@@ -45,7 +45,6 @@ export class RoomService {
       const rooms = await this.prisma.room.findMany({
         where: {
           placeId: placeId !== undefined ? placeId : undefined,
-          available: true,
           AND: {
             minOccupancy: {
               lte: peopleCount !== undefined ? peopleCount : undefined,

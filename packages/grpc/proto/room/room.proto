@@ -14,10 +14,10 @@ message GetRoomRequest {
 
 message GetRoomByFilterRequest {
     string placeId = 1;    
-    optional int32  peopleCount = 3;
-    optional string date = 4;                
-    optional string availableFrom = 5;           
-    optional string availableUntil = 6;           
+    optional int32  peopleCount = 2;
+    optional string date = 3;                
+    optional string availableFrom = 4;           
+    optional string availableUntil = 5;           
 }
 
 message RoomResponse {
