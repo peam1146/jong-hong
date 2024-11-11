@@ -110,6 +110,25 @@ func main() {
 
 				// Send the message to the broadcast channel
 				handlers.Broadcast <- msg
+
+				// Send the message to the penalty service
+				if noti.Type == "NOT_CHECKIN" || noti.Type == "NOT_CHECKOUT" {
+					unixTimeMillis, err := utils.ParseTime(noti.CreateAt)
+					if err != nil {
+						log.Printf("Error parsing time: %v", err)
+						continue
+					}
+					sentCfg := config.KafkaConnCfg{
+						Url:   messageBroker,
+						Topic: "penalty.create",
+					}
+					handlers.SendMessage(sentCfg, models.Penalty{
+						UserId:      noti.UserId,
+						PenaltyTime: 604_800_000, // 7 days in milliseconds
+						CausedBy:    string(noti.Type),
+						CreatedAt:   unixTimeMillis,
+					})
+				}
 			}
 		}
 

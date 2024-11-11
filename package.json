@@ -8,10 +8,10 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
+    "@jong-hong/project-config": "workspace:*",
     "prettier": "^3.2.5",
     "turbo": "^2.1.1",
-    "typescript": "^5.4.5",
-    "@jong-hong/project-config": "workspace:*"
+    "typescript": "^5.4.5"
   },
   "packageManager": "pnpm@9.10.0",
   "engines": {
@@ -20,5 +20,9 @@
   "volta": {
     "node": "20.17.0",
     "pnpm": "9.10.0"
+  },
+  "dependencies": {
+    "@radix-ui/react-alert-dialog": "^1.1.2",
+    "react-qr-reader": "3.0.0-beta-1"
   }
 }
