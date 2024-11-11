@@ -3,8 +3,10 @@ package initialization
 import (
 	"encoding/json"
 	"fmt"
+	"jong-hong/penalty/config"
 	"jong-hong/penalty/gapi"
 	"jong-hong/penalty/model"
+	"jong-hong/penalty/pkg/utils"
 	"jong-hong/penalty/proto/penalty"
 	"jong-hong/penalty/repository"
 	"log"
@@ -12,7 +14,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"google.golang.org/grpc"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -86,40 +87,50 @@ func ServerInit(db *gorm.DB) error {
 }
 
 func KafkaInit(db *gorm.DB) error {
-	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": "localhost:19092",
-		"group.id":          "penalty",
-		"auto.offset.reset": "earliest",
-	})
-	if err != nil {
-		log.Fatalf("failed to create consumer: %v", err)
-	}
 
-	err = consumer.Subscribe("penalty.create", nil)
-	if err != nil {
-		log.Fatalf("failed to subscribe: %v", err)
+	messageBroker := os.Getenv("MESSAGE_BROKER_URI")
+	fmt.Println("messageBroker", messageBroker)
+	cfg := config.KafkaConnCfg{
+		Url:   messageBroker,
+		Topic: "penalty.create",
 	}
+	conn := utils.KafkaConn(cfg)
+
+	// messageBroker := os.Getenv("MESSAGE_BROKER_URI")
+	// consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
+	// 	"bootstrap.servers": messageBroker,
+	// 	"group.id":          "penalty",
+	// 	"auto.offset.reset": "earliest",
+	// })
+	// if err != nil {
+	// 	log.Fatalf("failed to create consumer: %v", err)
+	// }
+
+	// err = consumer.Subscribe("penalty.create", nil)
+	// if err != nil {
+	// 	log.Fatalf("failed to subscribe: %v", err)
+	// }
 
 	penaltySvc := repository.NewDataPenalty(db)
 
 	log.Println("Kafka consumer is running...")
 	for {
-		msg, err := consumer.ReadMessage(-1)
-		if err == nil {
-			log.Printf("Message on %s: %s\n", msg.TopicPartition, string(msg.Value))
+		message, err := conn.ReadMessage(10e3)
+		if err != nil {
+			log.Printf("Error reading Kafka message: %v", err)
+			break
+		}
+		var penalty model.Penalty
+		if err := json.Unmarshal(message.Value, &penalty); err != nil {
+			log.Printf("Error unmarshalling message: %v", err)
+			continue
+		}
 
-			var penalty model.Penalty
-			if err := json.Unmarshal(msg.Value, &penalty); err != nil {
-				log.Printf("Error unmarshalling message: %v", err)
-				continue
-			}
-
-			_, err := penaltySvc.InsertPenalty(penalty)
-			if err != nil {
-				log.Printf("Error inserting penalty: %v", err)
-			}
-		} else {
-			log.Printf("Consumer error: %v\n", err)
+		_, err = penaltySvc.InsertPenalty(penalty)
+		if err != nil {
+			log.Printf("Error inserting penalty: %v", err)
+			return err
 		}
 	}
+	return nil
 }
