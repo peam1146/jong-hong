@@ -2,23 +2,6 @@ syntax = "proto3";
 
 package booking;
 
-import "google/protobuf/empty.proto";
-
-message BookingRequest {
-    string room_id = 1;
-    string user_id = 2;
-    string check_in = 3;
-    string check_out = 4;
-}
-
-message BookingResponse {
-    string booking_id = 1;
-}
-
-message CancelBookingRequest {
-    string booking_id = 1;
-}
-
 message GetUserBookingsRequest {
     string user_id = 1;
 }
@@ -66,8 +49,6 @@ message GetRoomDetailsResponse {
 }
 
 service BookingReserveService {
-  rpc Booking(BookingRequest) returns (BookingResponse) {}
-  rpc CancelReserve(CancelBookingRequest) returns (google.protobuf.Empty) {}
   rpc GetUserBookings(GetUserBookingsRequest) returns (GetUserBookingsResponse) {}
   rpc GetRoomBookings(GetRoomBookingsRequest) returns (GetRoomBookingsResponse) {}
   rpc GetRoomDetails(GetRoomDetailsRequest) returns (GetRoomDetailsResponse) {}

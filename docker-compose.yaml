@@ -56,9 +56,21 @@ services:
       - 8080:8080
     depends_on:
       - redpanda-0
+  postgres-0:
+    image: postgres:alpine
+    container_name: postgres-0
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-0:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
 
 networks:
   redpanda_network:
     driver: bridge
 volumes:
   redpanda-0: null
+  postgres-0: null
