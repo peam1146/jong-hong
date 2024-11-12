@@ -23,7 +23,8 @@ RUN pnpm install
 
 COPY --from=preparer /app/out/full/ .
 
-RUN pnpm prisma generate
+RUN cd apps-api/room && pnpm prisma generate
 RUN pnpm build --filter=@api/room
+COPY ./packages /packages
 
 CMD [ "node", "apps-api/room/dist/index.mjs" ]

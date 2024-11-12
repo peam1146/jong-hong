@@ -164,10 +164,38 @@ services:
       PORT: 7000
       MONGODB_URI: mongodb://root:password@notification-db
 
+  #------------BOOKING---------------
+
+  booking-db:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dbname
+    volumes:
+      - booking-db:/var/lib/postgresql/data
+
+  booking:
+    build:
+      context: .
+      dockerfile: ./apps-api/booking-v2/Dockerfile
+
+    ports:
+      - '8000:8000'
+    depends_on:
+      - booking-db
+      - redpanda-0
+    environment:
+      PORT: 8000
+      DATABASE_URL: postgres://user:password@booking-db:5432/dbname
+      KAFKA_BROKERS: redpanda-0:19092
+
 volumes:
   redpanda-0: null
   auth-db: null
   room-db: null
   penalty-db: null
   notification-db: null
+  booking-db: null
   postgres_data:

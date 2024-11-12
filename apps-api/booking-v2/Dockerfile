@@ -53,7 +53,7 @@ ADD https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC
 
 ENV HOSTNAME="0.0.0.0"
 ENV TZ="Asia/Bangkok"
-ENV PORT=50051
+ENV PORT="8000"
 
 CMD ["node", "apps-api/booking-v2/index.js"]
 
