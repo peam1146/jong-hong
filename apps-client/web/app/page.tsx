@@ -50,9 +50,14 @@ export default function Home() {
             </div>
             <p className="text-h2">Let&apos;s Jong Hong !</p>
           </div>
-          <div className="bg-green rounded-3xl border-black border-2 w-12 h-12 flex items-center justify-center px-2 py-2">
+          <button
+            onClick={() => {
+              setToken(null)
+            }}
+            className="bg-green rounded-3xl border-black border-2 w-12 h-12 flex items-center justify-center px-2 py-2"
+          >
             <SignOut size={32} weight="bold" />
-          </div>
+          </button>
         </div>
         <div className="flex flex-row justify-start items-center gap-2 py-2 px-4 rounded-3xl border-2 border-black bg-white h-10 self-stretch">
           <Skull size={24} weight="bold" className="text-orange" />

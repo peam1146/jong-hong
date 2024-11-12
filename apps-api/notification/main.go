@@ -14,16 +14,11 @@ import (
 	"jong-hong/notification/models"
 	"jong-hong/notification/pkg/utils"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 
 	docs := "www.mongodb.com/docs/drivers/go/current/"
 	mongoUri := os.Getenv("MONGODB_URI")
