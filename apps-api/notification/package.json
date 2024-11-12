@@ -1,0 +1,16 @@
+{
+  "name": "notification",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "gofumpt -l -w ."
+  },
+  "volta": {
+    "extends": "../../package.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

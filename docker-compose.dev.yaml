@@ -1,0 +1,135 @@
+services:
+  redpanda-0:
+    command:
+      - redpanda
+      - start
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr internal://redpanda-0:9092,external://redpanda-0:19092
+      - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr internal://redpanda-0:8082,external://redpanda-0:18082
+      - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
+      - --rpc-addr redpanda-0:33145
+      - --advertise-rpc-addr redpanda-0:33145
+      - --mode dev-container
+      - --smp 1
+      - --default-log-level=info
+    image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+    container_name: redpanda-0
+    volumes:
+      - redpanda-0:/var/lib/redpanda/data
+    ports:
+      - 18081:18081
+      - 18082:18082
+      - 19092:19092
+      - 19644:9644
+
+  console:
+    container_name: redpanda-console
+    image: docker.redpanda.com/redpandadata/console:v2.7.2
+    entrypoint: /bin/sh
+    command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml; /app/console'
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["redpanda-0:9092"]
+          schemaRegistry:
+            enabled: true
+            urls: ["http://redpanda-0:8081"]
+        redpanda:
+          adminApi:
+            enabled: true
+            urls: ["http://redpanda-0:9644"]
+    ports:
+      - 8080:8080
+    depends_on:
+      - redpanda-0
+
+  #------------GATEWAY---------------
+
+  # gateway:
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps-api/gateway/Dockerfile
+  #   env_file:
+  #     - ./apps-api/gateway/.env
+  #   ports:
+  #     - '3000:3000'
+  #   depends_on:
+  #     - auth
+
+  #------------AUTH---------------
+
+  auth-db:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    ports:
+      - '27017:27017'
+    volumes:
+      - auth-db:/data/db
+    depends_on:
+      - redpanda-0
+
+  auth:
+    build:
+      context: .
+      dockerfile: ./apps-api/auth/Dockerfile
+    env_file:
+      - ./apps-api/auth/.env
+    ports:
+      - '4000:4000'
+    depends_on:
+      - auth-db
+
+  #------------ROOM---------------
+  room-db:
+    image: postgres:14
+    container_name: room-db
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: room-service
+    volumes:
+      - room-db:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  #------------PENALTY---------------
+  penalty-db:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dbname
+    ports:
+      - '5433:5432'
+    volumes:
+      - penalty-db:/var/lib/postgresql/data
+  penalty:
+    build:
+      context: ./apps-api/penalty
+    ports:
+      - '1200:1200'
+    depends_on:
+      - penalty-db
+      - redpanda-0
+    environment:
+      MESSAGE_BROKER_URI: redpanda-0:19092
+      GRPC_ADDRESS: 1200
+      DB_HOST: penalty-db
+      DB_PORT: 5432
+      DB_USER: user
+      DB_NAME: dbname
+      DB_PASSWORD: password
+
+  #------------NOTIFICATION---------------
+
+volumes:
+  redpanda-0: null
+  auth-db: null
+  room-db: null
+  penalty-db: null
+  postgres_data:

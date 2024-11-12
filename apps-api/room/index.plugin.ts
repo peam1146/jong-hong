@@ -28,7 +28,7 @@ export default function NestPlugin(): JsPlugin {
               decoratorMetadata: script.decorators?.decoratorMetadata ?? true,
               decoratorVersion:
                 script.decorators?.decoratorVersion ?? '2021-12',
-              includes: [],
+              includes: ['../../packages/grpc/gen/**/*.ts'],
               excludes: ['node_modules/**/*'],
             },
           },

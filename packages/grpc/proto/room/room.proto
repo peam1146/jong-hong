@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package room;
+
+service RoomService {
+  rpc GetRoom(GetRoomRequest) returns (RoomResponse);
+  rpc GetRoomByFilter(GetRoomByFilterRequest) returns (RoomsResponse);
+  rpc UpdateAvailableRoom(UpdateAvailableRequest) returns (RoomResponse);
+}
+
+message GetRoomRequest {
+    string id = 1;               
+}
+
+message GetRoomByFilterRequest {
+    string placeId = 1;    
+    optional int32  peopleCount = 2;
+    optional string date = 3;                
+    optional string availableFrom = 4;           
+    optional string availableUntil = 5;           
+}
+
+message RoomResponse {
+  string  id = 1;
+  string  name = 2;
+  int32   minOccupancy = 3;
+  int32   maxOccupancy = 4;
+  string  placeId = 5;
+  bool    available=6;
+}
+ 
+
+message RoomsResponse {
+  repeated RoomResponse rooms = 1;
+}
+
+message UpdateAvailableRequest {
+  string  id = 1;
+  bool available=2;
+}
+
+

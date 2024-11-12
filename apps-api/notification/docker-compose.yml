@@ -1,0 +1,19 @@
+services:
+  notimongodb:
+    image: mongo:latest
+    container_name: notification-mongodb
+    restart: always
+    environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: password
+        MONGO_INITDB_DATABASE: notification
+    ports:
+        - 27017:27017
+  notiapp:
+    container_name: notification-app
+    build:
+      context: apps-api/notification
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
