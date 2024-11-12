@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package booking;
+
+message GetUserBookingsRequest { string user_id = 1; }
+
+message GetUserBookingsResponse {
+  message Booking {
+    string booking_id = 1;
+    string room_id = 2;
+    string check_in = 3;
+    string check_out = 4;
+  }
+  repeated Booking bookings = 1;
+}
+
+message GetRoomBookingsRequest { string room_id = 1; }
+
+message GetRoomBookingsResponse {
+  message Booking {
+    string booking_id = 1;
+    string user_id = 2;
+    string check_in = 3;
+    string check_out = 4;
+  }
+  repeated Booking bookings = 1;
+}
+
+message GetRoomDetailsRequest { string room_id = 1; }
+
+message GetRoomDetailsResponse {
+  string room_id = 2;
+  uint32 capacity = 3;
+}
+
+service BookingReserveService {
+  rpc GetUserBookings(GetUserBookingsRequest)
+      returns (GetUserBookingsResponse) {}
+  rpc GetRoomBookings(GetRoomBookingsRequest)
+      returns (GetRoomBookingsResponse) {}
+  rpc GetRoomDetails(GetRoomDetailsRequest) returns (GetRoomDetailsResponse) {}
+}

@@ -14,3 +14,5 @@ plugins:
     opt:
       - esModuleInterop=true
       - importSuffix=.js
+      - outputServices=generic-definitions
+      - outputServices=nice-grpc

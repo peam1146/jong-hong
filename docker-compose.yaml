@@ -17,8 +17,6 @@ services:
     container_name: redpanda-0
     volumes:
       - redpanda-0:/var/lib/redpanda/data
-    networks:
-      - redpanda_network
     ports:
       - 18081:18081
       - 18082:18082
@@ -28,8 +26,6 @@ services:
   console:
     container_name: redpanda-console
     image: docker.redpanda.com/redpandadata/console:v2.7.2
-    networks:
-      - redpanda_network
     entrypoint: /bin/sh
     command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml; /app/console'
     environment:
@@ -48,6 +44,31 @@ services:
       - 8080:8080
     depends_on:
       - redpanda-0
+  postgres-0:
+    image: postgres:alpine
+    container_name: postgres-0
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - postgres-0:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+  booking-v2:
+    build:
+      context: .
+      dockerfile: apps-api/booking-v2/Dockerfile
+      platforms:
+        - linux/amd64
+    environment:
+      - PORT=50051
+      - DATABASE_URL=postgres://postgres:postgres@postgres-0:5432/postgres
+      - KAFKA_BROKERS=redpanda-0:9092
+    depends_on:
+      - redpanda-0
+    # ports:
+    #   - 50051:50051
 
   room-db:
     image: postgres:14
@@ -58,8 +79,8 @@ services:
       POSTGRES_DB: room-service
     volumes:
       - room-db:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
+    # ports:
+    #   - '5432:5432'
   # notimongodb:
   #   image: mongo:latest
   #   container_name: notification-mongodb
@@ -132,5 +153,6 @@ networks:
     driver: bridge
 volumes:
   redpanda-0: null
+  postgres-0: null
   room-db: null
   postgres_data:
