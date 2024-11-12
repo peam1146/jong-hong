@@ -6,20 +6,12 @@ export function validateDateFormat(date: string): boolean {
 
 export function validateTimeFormat(time: string): boolean {
   // รูปแบบ HH:MM AM|PM
-  const timePattern = /^(0[1-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/;
+  const timePattern = /^(0[1-9]|1[0-2]):([0-5][0-9])$/;
   return timePattern.test(time);
 }
 
 // Convert time to 24-hour format for comparison
 export function convertTo24HourFormat(time: string): string {
-  const [hoursMinutes, period] = time.split(' ');
-  let [hours, minutes] = hoursMinutes.split(':').map(Number);
-
-  if (period === 'PM' && hours !== 12) {
-    hours += 12;
-  } else if (period === 'AM' && hours === 12) {
-    hours = 0; // Midnight case
-  }
-
+  const [hours, minutes] = time.split(':').map(Number);
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }

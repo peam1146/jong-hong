@@ -1,9 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { KafkaOptions, Transport } from '@nestjs/microservices';
-import { environment } from './enviroment';
 
-const __dirname = process.cwd();
+import { AppModule } from './app.module';
+import { environment } from './enviroment';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,8 +20,9 @@ async function bootstrap() {
   });
 
   await app.startAllMicroservices();
-
-  await app.listen(environment.PORT);
+  await app.listen(environment.PORT, () => {
+    console.log(`Auth service is running on ${environment.PORT}`);
+  });
 }
 
-bootstrap();
+if (process.env.IS_BUILDING !== 'true') bootstrap();

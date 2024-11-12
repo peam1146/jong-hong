@@ -4,6 +4,7 @@ import {
 } from '@jong-hong/grpc/nestjs/proto/room/place';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+
 import { DatabaseService } from '../database/database.service';
 
 @Injectable()

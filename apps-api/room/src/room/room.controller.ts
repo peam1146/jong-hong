@@ -1,16 +1,17 @@
-import { Controller } from '@nestjs/common';
-import { RoomService } from './room.service';
 import {
+  GetRoomByFilterRequest,
+  GetRoomRequest,
+  RoomResponse,
   RoomServiceController,
   RoomServiceControllerMethods,
-  RoomResponse,
   RoomsResponse,
-  GetRoomRequest,
-  GetRoomByFilterRequest,
   UpdateAvailableRequest,
 } from '@jong-hong/grpc/nestjs/proto/room/room';
-import { EventPattern, Payload, RpcException } from '@nestjs/microservices';
-import { Empty } from '@jong-hong/grpc/nestjs/google/protobuf/empty';
+import { Controller } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
+
+import { RoomService } from './room.service';
+
 import { validateDateFormat, validateTimeFormat } from '../utils/time.util';
 
 @Controller()
@@ -28,19 +29,19 @@ export class RoomController implements RoomServiceController {
   async getRoomByFilter(
     request: GetRoomByFilterRequest,
   ): Promise<RoomsResponse> {
-    if (!request.date && !validateDateFormat(request.date))
+    if (request.date && !validateDateFormat(request.date))
       throw new RpcException({
         code: 400,
         message: 'Invalid date format (DD/MM/YY)',
       });
 
     if (
-      (!request.availableFrom && !validateTimeFormat(request.availableFrom)) ||
-      (!request.availableUntil && !validateTimeFormat(request.availableUntil))
+      (request.availableFrom && !validateTimeFormat(request.availableFrom)) ||
+      (request.availableUntil && !validateTimeFormat(request.availableUntil))
     )
       throw new RpcException({
         code: 400,
-        message: 'Invalid time format (HH:MM AM/HH:MM PM)',
+        message: 'Invalid time format (HH:MM)',
       });
 
     if (request.peopleCount != null && request.peopleCount <= 0)

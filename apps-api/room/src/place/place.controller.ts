@@ -1,11 +1,12 @@
-import { Controller } from '@nestjs/common';
-import { PlaceService } from './place.service';
+import { Empty } from '@jong-hong/grpc/nestjs/google/protobuf/empty';
 import {
+  GetAllPlaceResponse,
   PlaceServiceController,
   PlaceServiceControllerMethods,
-  GetAllPlaceResponse,
 } from '@jong-hong/grpc/nestjs/proto/room/place';
-import { Empty } from '@jong-hong/grpc/nestjs/google/protobuf/empty';
+import { Controller } from '@nestjs/common';
+
+import { PlaceService } from './place.service';
 
 @Controller()
 @PlaceServiceControllerMethods()

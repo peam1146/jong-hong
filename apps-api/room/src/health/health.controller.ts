@@ -1,7 +1,7 @@
 import {
-  RoomHealthServiceController,
   PingRequest,
   PingResponse,
+  RoomHealthServiceController,
   RoomHealthServiceControllerMethods,
 } from '@jong-hong/grpc/nestjs/proto/room/health';
 import { Controller } from '@nestjs/common';

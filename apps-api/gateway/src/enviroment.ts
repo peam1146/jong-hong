@@ -5,7 +5,8 @@ dotenv.config();
 
 export const EnvironmentSchema = v.object({
   PORT: v.string(),
-  BOOKING_GRPC_URL: v.string(),
+  AUTH_SERVICE_URL: v.string(),
+  ROOM_SERVICE_URL: v.string(),
 });
 
 export const environment = v.parse(EnvironmentSchema, process.env);

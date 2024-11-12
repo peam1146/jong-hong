@@ -1,7 +1,5 @@
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { User, Key } from '@phosphor-icons/react/dist/ssr'
-
+import Link from 'next/link'
 export default function SignInPage() {
   return (
     <>
@@ -10,15 +8,9 @@ export default function SignInPage() {
           <p className="text-h1 pt-4">Jong Hong</p>
           <p className="text-h2">Book a room</p>
         </div>
-        <div className="flex flex-col items-start gap-4 self-stretch">
-          <Input placeholder="Student ID" icon={<User color="black" weight="bold" />} />
-          <Input
-            type="password"
-            placeholder="Password"
-            icon={<Key color="black" weight="bold" />}
-          />
-        </div>
-        <Button className="self-stretch">Sign in</Button>
+        <Link href={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/auth`}>
+          <Button className="self-stretch">Sign in with Google</Button>
+        </Link>
       </div>
     </>
   )

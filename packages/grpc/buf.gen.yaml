@@ -1,6 +1,6 @@
 version: v2
 plugins:
-  - local: .\node_modules\.bin\protoc-gen-ts_proto.CMD
+  - local: ./node_modules/ts-proto/protoc-gen-ts_proto
     out: gen/nestjs
     strategy: all
     opt:
@@ -8,7 +8,7 @@ plugins:
       - importSuffix=.js
       - nestJs=true
       - addGrpcMetadata=true
-  - local: .\node_modules\.bin\protoc-gen-ts_proto.CMD
+  - local: ./node_modules/ts-proto/protoc-gen-ts_proto
     out: gen/ts
     strategy: all
     opt:

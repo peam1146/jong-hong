@@ -1,17 +1,44 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Tag } from '@/components/ui/tag'
-import { useToast } from '@/hooks/use-toast'
-import { User } from '@phosphor-icons/react/dist/ssr'
-import { SignOut, Skull } from '@phosphor-icons/react/dist/ssr'
-import { PlaceCard } from '@/components/ui/placeCard'
+import { useEffect } from 'react'
+
+import { useAuthContext } from '@/components/provider/auth'
 import { Navbar } from '@/components/ui/navbar'
+import { PlaceCard } from '@/components/ui/placeCard'
+import { useToast } from '@/hooks/use-toast'
+import { SignOut, Skull } from '@phosphor-icons/react/dist/ssr'
+import { useQuery } from '@tanstack/react-query'
+import { useSearchParams } from 'next/navigation'
 
 export default function Home() {
   const { toast } = useToast()
+  const searchParams = useSearchParams()
+  const { setToken } = useAuthContext()
+
+  useEffect(() => {
+    if (!searchParams.has('token')) return
+    const token = searchParams.get('token')
+    setToken(token!)
+  }, [searchParams, toast, setToken])
+
+  const { data: profile } = useQuery<{
+    name: string
+  }>({
+    queryKey: [`auth/profile`],
+  })
+
+  const { data: places } = useQuery<{
+    places: {
+      id: string
+      name: string
+      open: string
+      close: string
+      availableCount: number
+    }[]
+  }>({
+    queryKey: [`room/place`],
+  })
+
   return (
     <>
       <div id="app-container" className="flex flex-col items-start gap-4 mb-14">
@@ -19,9 +46,9 @@ export default function Home() {
           <div className="flex flex-col items-start flex-1">
             <div className="flex space-x-1">
               <p className="text-h3 text-orange">Sawasdee</p>
-              <p className="text-h3 text-Black">Pimnut U.</p>
+              <p className="text-h3 text-Black truncate text-ellipsis w-40">{profile?.name}</p>
             </div>
-            <p className="text-h2">Let's Jong Hong !</p>
+            <p className="text-h2">Let&apos;s Jong Hong !</p>
           </div>
           <div className="bg-green rounded-3xl border-black border-2 w-12 h-12 flex items-center justify-center px-2 py-2">
             <SignOut size={32} weight="bold" />
@@ -33,27 +60,19 @@ export default function Home() {
           <p className="text-h4 text-Black">Until 17 May</p>
         </div>
         <div className="flex flex-col gap-5 self-stretch">
-          <PlaceCard
-            bgColor="pink"
-            name="ENG Library @EN3"
-            numberOfPeople="1 - 10"
-            time="8AM - 4PM"
-            status="4 hongs ready to jong"
-          />
-          <PlaceCard
-            bgColor="yellow"
-            name="Sky Cafe @EN4 11th Floor"
-            numberOfPeople="1 - 10"
-            time="8AM - 4PM"
-            status="No hongs now"
-          />
-          <PlaceCard
-            bgColor="green"
-            name="EN100 3rd Floor"
-            numberOfPeople="1 - 10"
-            time="8AM - 4PM"
-            status="4 hongs ready to jong"
-          />
+          {places?.places.map((place) => (
+            <PlaceCard
+              id={place.id}
+              key={place.id}
+              bgColor={
+                place.availableCount > 5 ? 'green' : place.availableCount > 2 ? 'yellow' : 'pink'
+              }
+              name={place.name}
+              numberOfPeople="1 - 10"
+              time={`${place.open} - ${place.close}`}
+              status={`${place.availableCount} hongs ready to jong`}
+            />
+          ))}
         </div>
       </div>
       <Navbar />

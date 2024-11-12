@@ -8,21 +8,21 @@ datasource db {
 }
 
 model Place {
-  id          String  @id @default(uuid())
-  name        String  @db.VarChar(255)
-  open        String 
-  close       String  
-  rooms       Room[]
+  id    String @id @default(uuid())
+  name  String @db.VarChar(255)
+  open  String
+  close String
+  rooms Room[]
 }
 
 model Room {
-  id          String   @id @default(uuid())
-  name        String   @db.VarChar(255)
-  placeId     String   
+  id           String  @id @default(uuid())
+  name         String  @db.VarChar(255)
+  placeId      String
   minOccupancy Int
   maxOccupancy Int
-  available    Boolean  @default(true)
-  place       Place @relation(fields: [placeId], references: [id])
+  available    Boolean @default(true)
+  place        Place   @relation(fields: [placeId], references: [id])
 
   @@index([placeId])
 }

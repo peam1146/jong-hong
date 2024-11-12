@@ -6,14 +6,16 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
+
+import { AuthService } from './auth.service';
 import { JWTAuthGuard } from './guards/auth.guard';
-import { UserService } from '../user/user.service';
-import { JwtPayload } from './types/JWTpayload';
-import { User } from '../schemas/user.schema';
+import type { JwtPayload } from './types/JWTpayload';
+
 import { environment } from '../enviroment';
+import { User } from '../schemas/user.schema';
+import { UserService } from '../user/user.service';
 
 @Controller('auth')
 export class AuthController {
@@ -52,6 +54,7 @@ export class AuthController {
   @Get('profile')
   @UseGuards(JWTAuthGuard)
   async getProfile(@Req() req, @Res({ passthrough: true }) res: Response) {
+    console.log(req.payload);
     const user: User = await this.userService.findById(req.payload.id);
     return user;
   }

@@ -1,16 +1,48 @@
 'use client'
-import { Clock, ArrowLeft, Funnel } from '@phosphor-icons/react/dist/ssr'
-import { RoomCard } from '@/components/ui/roomCard'
-import { FilterPopup } from '@/components/ui/filterPopup'
 import { useState } from 'react'
+
+import { FilterPopup } from '@/components/ui/filterPopup'
+import { RoomCard } from '@/components/ui/roomCard'
+import { ArrowLeft, Clock, Funnel } from '@phosphor-icons/react/dist/ssr'
+import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 
 export default function PlaceDetailPage({ params }: { params: { pid: string } }) {
   const [popupOpen, setPopupOpen] = useState(false)
+  const [filter, setFilter] = useState({
+    numberOfPeople: 1,
+    date: '',
+    startTime: '',
+    endTime: '',
+  })
 
-  const handleConfirm = () => {
+  const handleConfirm = (filter: {
+    numberOfPeople: number
+    date: string
+    startTime: string
+    endTime: string
+  }) => {
+    setFilter(filter)
     setPopupOpen(false)
   }
+
+  const { data: room } = useQuery<{
+    id: string
+    name: string
+    open: string
+    close: string
+    availableCount: number
+    rooms: {
+      id: string
+      name: string
+      minOccupancy: number
+      maxOccupancy: number
+      placeId: string
+      available: boolean
+    }[]
+  }>({
+    queryKey: [`room/place/${params.pid}`, filter],
+  })
 
   return (
     <div>
@@ -30,31 +62,30 @@ export default function PlaceDetailPage({ params }: { params: { pid: string } })
             <ArrowLeft size={32} weight="bold" />
           </div>
         </Link>
-        <div
+        <button
           onClick={() => setPopupOpen(true)}
           className="bg-white rounded-3xl border-black border-2 w-12 h-12 flex items-center justify-center px-2 py-2 absolute right-4 top-4"
         >
           <Funnel size={32} weight="bold" />
-        </div>
-        <p className="text-h2">ENG Library @EN3</p>
+        </button>
+        <p className="text-h2">{room?.name}</p>
         <div className="flex items-center gap-2">
           <Clock size={20} weight="bold" />
-          <p className="text-h4">9AM - 4PM</p>
+          <p className="text-h4">
+            {room?.open} - {room?.close}
+          </p>
         </div>
       </div>
-      <div id="app-container" className="flex flex-col gap-4">
-        <div className="flex flex-row gap-4">
-          <RoomCard name="211" numberOfPeople="1 - 10" />
-          <RoomCard name="212" numberOfPeople="1 - 10" />
-        </div>
-        <div className="flex flex-row gap-4">
-          <RoomCard name="213" numberOfPeople="1 - 10" />
-          <RoomCard name="214" numberOfPeople="1 - 10" />
-        </div>
-        <div className="flex flex-row gap-4">
-          <RoomCard name="215" numberOfPeople="1 - 10" />
-          <RoomCard name="216" numberOfPeople="1 - 10" />
-        </div>
+      <div id="app-container" className="grid grid-cols-2 gap-4">
+        {room?.rooms?.map((room) => (
+          <RoomCard
+            placeId={params.pid}
+            key={room.id}
+            id={room.id}
+            name={room.name}
+            numberOfPeople={`${room.minOccupancy} - ${room.maxOccupancy}`}
+          />
+        ))}
       </div>
     </div>
   )
