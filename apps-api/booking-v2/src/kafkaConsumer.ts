@@ -17,6 +17,8 @@ const TopicMap = {
   BOOKING_REQUESTED_FAILED_TOPIC: 'booking.requested.failed',
   BOOKING_CANCELED_SUCCESS_TOPIC: 'booking.canceled.success',
   BOOKING_CANCELED_FAILED_TOPIC: 'booking.canceled.failed',
+  NOTIFICATION_NOTIFY_TOPIC: 'notification-notify',
+  NOTIFICATION_NOTIFY_CANCELED_TOPIC: 'notification-notify.canceled',
 } as const
 
 const SubscribedTopics = {
@@ -153,6 +155,19 @@ async function bookingRequested(payload: Buffer) {
       },
     ],
   })
+  await publisher.send({
+    topic: TopicMap.NOTIFICATION_NOTIFY_TOPIC,
+    messages: [
+      {
+        value: JSON.stringify({
+          userId: parsed.output.userId,
+          roomId: parsed.output.roomId,
+          CheckinTime: parsed.output.checkIn.toISOString(),
+          CheckoutTime: parsed.output.checkOut.toISOString(),
+        }),
+      },
+    ],
+  })
 }
 
 async function bookingCanceled(payload: Buffer) {
@@ -205,6 +220,17 @@ async function bookingCanceled(payload: Buffer) {
           data: {
             bookingId: parsed.output.bookingId,
           },
+        }),
+      },
+    ],
+  })
+
+  await publisher.send({
+    topic: TopicMap.NOTIFICATION_NOTIFY_CANCELED_TOPIC,
+    messages: [
+      {
+        value: JSON.stringify({
+          bookingId: parsed.output.bookingId,
         }),
       },
     ],
