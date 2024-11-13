@@ -60,7 +60,7 @@ export default function ActivityPage() {
           {data?.bookings
             .filter((booking) => isBefore(new Date(booking.checkOut), new Date()) === false)
             .map((booking) => {
-              const status = isBefore(new Date(booking.checkIn), new Date())
+              const status = isBefore(new Date(), new Date(booking.checkIn))
                 ? 'notdue'
                 : isBefore(addMinutes(new Date(booking.checkIn), 15), new Date())
                   ? 'checking'
@@ -91,16 +91,42 @@ export default function ActivityPage() {
                   date={format(new Date(booking.checkIn), 'd MMM')}
                   time={`${format(new Date(booking.checkIn), 'h:mma')} - ${format(new Date(booking.checkOut), 'h:mma')}`}
                   timeLeft={time ? (time < 0 ? 0 : time) : undefined}
-                  onCheckOut={
-                    status === 'jonging'
-                      ? () => {
-                          toast({
-                            title: 'Check out success',
-                            description: 'You have successfully checked out',
-                          })
-                        }
-                      : undefined
-                  }
+                  onCheckOut={async () => {
+                    const res = await fetch(
+                      `${process.env.NEXT_PUBLIC_GATEWAY_URL}/booking/cancel/${booking.bookingId}`,
+                      {
+                        method: 'POST',
+                        headers: {
+                          Authorization: `Bearer ${localStorage.getItem('token')}`,
+                        },
+                      }
+                    )
+
+                    if (res.ok) {
+                      toast({
+                        title: 'Check out successful',
+                        description: 'You have successfully checkout',
+                      })
+                    }
+                  }}
+                  onCanceled={async () => {
+                    const res = await fetch(
+                      `${process.env.NEXT_PUBLIC_GATEWAY_URL}/booking/cancel/${booking.bookingId}`,
+                      {
+                        method: 'POST',
+                        headers: {
+                          Authorization: `Bearer ${localStorage.getItem('token')}`,
+                        },
+                      }
+                    )
+
+                    if (res.ok) {
+                      toast({
+                        title: 'Booking canceled',
+                        description: 'You have successfully canceled your booking',
+                      })
+                    }
+                  }}
                 />
               )
             })}

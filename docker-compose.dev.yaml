@@ -194,6 +194,17 @@ services:
       DATABASE_URL: postgres://user:password@booking-db:5432/booking
       KAFKA_BROKERS: redpanda-0:9092
 
+  qr:
+    build:
+      context: ./apps-api/qr
+    ports:
+      - '9001:9001'
+    depends_on:
+      - redpanda-0
+    environment:
+      WEBSOCKET_PORT: 9001
+      KAFKA_BROKERS: redpanda-0:9092
+
 volumes:
   redpanda-0: null
   auth-db: null

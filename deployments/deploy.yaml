@@ -1,0 +1,717 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: redpanda-apps
+---
+# PersistentVolumeClaims
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redpanda-0-pvc
+  namespace: redpanda-apps
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: auth-db-pvc
+  namespace: redpanda-apps
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: room-db-pvc
+  namespace: redpanda-apps
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: penalty-db-pvc
+  namespace: redpanda-apps
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: notification-db-pvc
+  namespace: redpanda-apps
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: booking-db-pvc
+  namespace: redpanda-apps
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+# ConfigMaps
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: console-config
+  namespace: redpanda-apps
+data:
+  config.yml: |
+    kafka:
+      brokers: ["redpanda-0:9092"]
+      schemaRegistry:
+        enabled: true
+        urls: ["http://redpanda-0:8081"]
+    redpanda:
+      adminApi:
+        enabled: true
+        urls: ["http://redpanda-0:9644"]
+---
+# Deployments and Services
+---
+# Redpanda Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redpanda-0
+  namespace: redpanda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redpanda-0
+  template:
+    metadata:
+      labels:
+        app: redpanda-0
+    spec:
+      containers:
+        - name: redpanda
+          image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+          command:
+            - redpanda
+            - start
+            - --kafka-addr
+            - internal://0.0.0.0:9092,external://0.0.0.0:19092
+            - --advertise-kafka-addr
+            - internal://redpanda-0:9092,external://localhost:19092
+            - --pandaproxy-addr
+            - internal://0.0.0.0:8082,external://0.0.0.0:18082
+            - --advertise-pandaproxy-addr
+            - internal://redpanda-0:8082,external://localhost:18082
+            - --schema-registry-addr
+            - internal://0.0.0.0:8081,external://0.0.0.0:18081
+            - --rpc-addr
+            - redpanda-0:33145
+            - --advertise-rpc-addr
+            - redpanda-0:33145
+            - --mode
+            - dev-container
+            - --smp
+            - '1'
+            - --default-log-level=info
+          ports:
+            - containerPort: 18081
+            - containerPort: 18082
+            - containerPort: 19092
+            - containerPort: 9644
+          volumeMounts:
+            - name: redpanda-data
+              mountPath: /var/lib/redpanda/data
+      volumes:
+        - name: redpanda-data
+          persistentVolumeClaim:
+            claimName: redpanda-0-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redpanda-0
+  namespace: redpanda-apps
+spec:
+  selector:
+    app: redpanda-0
+  ports:
+    - name: schema-registry
+      port: 8081
+      targetPort: 8081
+    - name: pandaproxy
+      port: 8082
+      targetPort: 8082
+    - name: kafka-external
+      port: 19092
+      targetPort: 19092
+    - name: rpc
+      port: 9644
+      targetPort: 9644
+---
+# Console Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redpanda-console
+  namespace: redpanda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redpanda-console
+  template:
+    metadata:
+      labels:
+        app: redpanda-console
+    spec:
+      containers:
+        - name: console
+          image: docker.redpanda.com/redpandadata/console:v2.7.2
+          command: ['/bin/sh', '-c']
+          args:
+            - echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml && /app/console
+          env:
+            - name: CONFIG_FILEPATH
+              value: /tmp/config.yml
+            - name: CONSOLE_CONFIG_FILE
+              valueFrom:
+                configMapKeyRef:
+                  name: console-config
+                  key: config.yml
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: config-volume
+              mountPath: /tmp
+      volumes:
+        - name: config-volume
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redpanda-console
+  namespace: redpanda-apps
+spec:
+  selector:
+    app: redpanda-console
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: NodePort # Change to LoadBalancer if external access is needed
+---
+# Auth DB Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-db
+  namespace: redpanda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-db
+  template:
+    metadata:
+      labels:
+        app: auth-db
+    spec:
+      containers:
+        - name: mongo
+          image: mongo
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: 'root'
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: 'root'
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: auth-db-data
+              mountPath: /data/db
+      volumes:
+        - name: auth-db-data
+          persistentVolumeClaim:
+            claimName: auth-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-db
+  namespace: redpanda-apps
+spec:
+  selector:
+    app: auth-db
+  ports:
+    - port: 27017
+      targetPort: 27017
+---
+# Auth Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  namespace: redpanda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+        - name: auth
+          image: your-registry/auth:latest # Replace with your build image
+          ports:
+            - containerPort: 4000
+          envFrom:
+            - configMapRef:
+                name: auth-env # Define as needed
+          # If using Secrets, add secretRef here
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+  namespace: redpanda-apps
+spec:
+  selector:
+    app: auth
+  ports:
+    - port: 4000
+      targetPort: 4000
+---
+# Room DB Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: room-db
+  namespace: redpanda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: room-db
+  template:
+    metadata:
+      labels:
+        app: room-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:14
+          env:
+            - name: POSTGRES_USER
+              value: 'root'
+            - name: POSTGRES_PASSWORD
+              value: 'root'
+            - name: POSTGRES_DB
+              value: 'room-service'
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: room-db-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: room-db-data
+          persistentVolumeClaim:
+            claimName: room-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: room-db
+  namespace: redpanda-apps
+spec:
+  selector:
+    app: room-db
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+# Room Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: room
+  namespace: redpanda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: room
+  template:
+    metadata:
+      labels:
+        app: room
+    spec:
+      containers:
+        - name: room
+          image: your-registry/room:latest # Replace with your build image
+          ports:
+            - containerPort: 5001
+          env:
+            - name: BROKER_URL
+              value: 'redpanda-0:9092'
+            - name: GRPC_PORT
+              value: '5001'
+            - name: DATABASE_URL
+              value: 'postgres://root:root@room-db:5432/room-service'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: room
+  namespace: redpanda-apps
+spec:
+  selector:
+    app: room
+  ports:
+    - port: 5001
+      targetPort: 5001
+---
+# Penalty DB Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: penalty-db
+  namespace: redpanda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: penalty-db
+  template:
+    metadata:
+      labels:
+        app: penalty-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:13
+          env:
+            - name: POSTGRES_USER
+              value: 'user'
+            - name: POSTGRES_PASSWORD
+              value: 'password'
+            - name: POSTGRES_DB
+              value: 'dbname'
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: penalty-db-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: penalty-db-data
+          persistentVolumeClaim:
+            claimName: penalty-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: penalty-db
+  namespace: redpanda-apps
+spec:
+  selector:
+    app: penalty-db
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+# Penalty Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: penalty
+  namespace: redpanda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: penalty
+  template:
+    metadata:
+      labels:
+        app: penalty
+    spec:
+      containers:
+        - name: penalty
+          image: your-registry/penalty:latest # Replace with your build image
+          ports:
+            - containerPort: 6000
+          env:
+            - name: MESSAGE_BROKER_URI
+              value: 'redpanda-0:9092'
+            - name: GRPC_ADDRESS
+              value: '6000'
+            - name: DB_HOST
+              value: 'penalty-db'
+            - name: DB_PORT
+              value: '5432'
+            - name: DB_USER
+              value: 'user'
+            - name: DB_NAME
+              value: 'dbname'
+            - name: DB_PASSWORD
+              value: 'password'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: penalty
+  namespace: redpanda-apps
+spec:
+  selector:
+    app: penalty
+  ports:
+    - port: 6000
+      targetPort: 6000
+---
+# Notification DB Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-db
+  namespace: redpanda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-db
+  template:
+    metadata:
+      labels:
+        app: notification-db
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:latest
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: 'root'
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: 'password'
+            - name: MONGO_INITDB_DATABASE
+              value: 'notification'
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: notification-db-data
+              mountPath: /data/db
+      volumes:
+        - name: notification-db-data
+          persistentVolumeClaim:
+            claimName: notification-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-db
+  namespace: redpanda-apps
+spec:
+  selector:
+    app: notification-db
+  ports:
+    - port: 27017
+      targetPort: 27017
+---
+# Notification Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification
+  namespace: redpanda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification
+  template:
+    metadata:
+      labels:
+        app: notification
+    spec:
+      containers:
+        - name: notification
+          image: your-registry/notification:latest # Replace with your build image
+          ports:
+            - containerPort: 7000
+          env:
+            - name: MESSAGE_BROKER_URI
+              value: 'redpanda-0:9092'
+            - name: PORT
+              value: '7000'
+            - name: MONGODB_URI
+              value: 'mongodb://root:password@notification-db:27017/notification'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification
+  namespace: redpanda-apps
+spec:
+  selector:
+    app: notification
+  ports:
+    - port: 7000
+      targetPort: 7000
+---
+# Booking DB Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-db
+  namespace: redpanda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: booking-db
+  template:
+    metadata:
+      labels:
+        app: booking-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:13
+          env:
+            - name: POSTGRES_USER
+              value: 'user'
+            - name: POSTGRES_PASSWORD
+              value: 'password'
+            - name: POSTGRES_DB
+              value: 'dbname'
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: booking-db-data
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: booking-db-data
+          persistentVolumeClaim:
+            claimName: booking-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking-db
+  namespace: redpanda-apps
+spec:
+  selector:
+    app: booking-db
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+# Booking Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking
+  namespace: redpanda-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: booking
+  template:
+    metadata:
+      labels:
+        app: booking
+    spec:
+      containers:
+        - name: booking
+          image: your-registry/booking:latest # Replace with your build image
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PORT
+              value: '8000'
+            - name: DATABASE_URL
+              value: 'postgres://user:password@booking-db:5432/booking'
+            - name: KAFKA_BROKERS
+              value: 'redpanda-0:9092'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: booking
+  namespace: redpanda-apps
+spec:
+  selector:
+    app: booking
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+# Optional: Ingress (if you want to expose services externally)
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: redpanda-ingress
+  namespace: redpanda-apps
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: your-domain.com
+      http:
+        paths:
+          - path: /console
+            pathType: Prefix
+            backend:
+              service:
+                name: redpanda-console
+                port:
+                  number: 8080
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: auth
+                port:
+                  number: 4000
+          # Add more paths for other services as needed

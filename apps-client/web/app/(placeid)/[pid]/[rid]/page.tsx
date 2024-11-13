@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast'
 import { processBookings } from '@/lib/time'
 import { ArrowLeft, CaretLeft, CaretRight, Skull, User } from '@phosphor-icons/react/dist/ssr'
 import { useQuery } from '@tanstack/react-query'
-import { addDays, addHours, format } from 'date-fns'
+import { addDays, format } from 'date-fns'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 export default function RoomDetailPage({ params }: { params: { rid: string; pid: string } }) {
@@ -57,7 +57,7 @@ export default function RoomDetailPage({ params }: { params: { rid: string; pid:
   const [displayDate, setDisplayDate] = useState(new Date())
   const place = places?.places.find((place) => place.id === pid)
   const slot = processBookings(
-    data?.bookings.filter(({ checkIn }) => {
+    (data?.bookings ?? []).filter(({ checkIn }) => {
       return new Date(checkIn).getDate() === displayDate.getDate()
     }) ?? [],
     place?.open ?? '10:00 AM',
@@ -89,12 +89,12 @@ export default function RoomDetailPage({ params }: { params: { rid: string; pid:
         description=""
         confirmLabel="Confirm"
         onConfirm={({ date, startTime, endTime }) => {
-          fetch(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/booking`, {
+          fetch(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/booking/book`, {
             method: 'POST',
             body: JSON.stringify({
               roomId: rid,
-              checkIn: addHours(new Date(`${date} ${startTime}`), 7).toISOString(),
-              checkOut: addHours(new Date(`${date} ${endTime}`), 7).toISOString(),
+              checkIn: new Date(`${date} ${startTime}`).toISOString(),
+              checkOut: new Date(`${date} ${endTime}`).toISOString(),
             }),
             headers: {
               'Content-Type': 'application/json',

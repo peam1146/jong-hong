@@ -52,7 +52,13 @@ export class BookingController {
     await this.consumer.connect();
     await this.publisher.connect();
     await this.consumer.subscribe({
-      topics: ['booking.requested.success', 'booking.requested.failed'],
+      topics: [
+        'booking.requested.success',
+        'booking.requested.failed',
+        'booking.cancel.success',
+        'booking.cancel.failed',
+        'booking.checkin.success',
+      ],
     });
 
     await this.consumer.run({
@@ -66,12 +72,24 @@ export class BookingController {
           subject.next({ bookingId });
         } else if (topic === 'booking.requested.failed') {
           console.log('Booking failed');
+        } else if (topic === 'booking.canceled.success') {
+          const {
+            data: { bookingId },
+          } = JSON.parse(message.value.toString());
+          const subject = this.idToSubject.get(bookingId);
+          subject.next({ bookingId });
+        } else if (topic === 'booking.checkin.success') {
+          const {
+            data: { bookingId },
+          } = JSON.parse(message.value.toString());
+          const subject = this.idToSubject.get(bookingId);
+          subject.next({ bookingId });
         }
       },
     });
   }
 
-  @Post()
+  @Post('/book')
   async createBooking(
     @Body() body: { roomId: string; checkIn: string; checkOut: string },
     @Req() req,
@@ -112,6 +130,62 @@ export class BookingController {
     });
   }
 
+  @Post('/checkin/:qrcode')
+  async checkIn(@Req() req, @Param('qrcode') qrcode: string) {
+    const subject = new Subject();
+    const [roomId, timestamp] = qrcode.split(':');
+    const profile = await getProfile(req);
+    const userBookings = await lastValueFrom(
+      this.bookingReserveServiceClient.getUserBookings({
+        userId: profile._id,
+      }),
+    );
+
+    const booking = userBookings.bookings.find((booking) => {
+      if (booking.roomId === roomId) {
+        return true;
+      }
+    });
+
+    this.idToSubject.set(booking.bookingId, subject);
+
+    this.publisher.send({
+      topic: 'booking.checkin',
+      messages: [
+        {
+          value: JSON.stringify({
+            bookingId: booking.bookingId,
+            userId: profile._id,
+            roomId,
+          }),
+        },
+      ],
+    });
+
+    this.publisher.send({
+      topic: 'qrcode',
+      messages: [
+        {
+          value: 'REFRESH',
+        },
+      ],
+    });
+
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject('Booking failed');
+      }, 5000);
+      subject.subscribe({
+        next: (value) => {
+          resolve(value);
+        },
+        error: (err) => {
+          reject(err);
+        },
+      });
+    });
+  }
+
   @Get('/room/:roomId')
   async getRoom(@Param('roomId') roomId: string) {
     return lastValueFrom(
@@ -129,5 +203,40 @@ export class BookingController {
         userId: profile._id,
       }),
     );
+  }
+
+  @Post('/cancel/:bookingId')
+  async cancel(@Req() req, @Param('bookingId') bookingId: string) {
+    console.log('cancel', bookingId);
+    const profile = await getProfile(req);
+    const subject = new Subject();
+
+    this.idToSubject.set(bookingId, subject);
+
+    this.publisher.send({
+      topic: 'booking.canceled',
+      messages: [
+        {
+          value: JSON.stringify({
+            bookingId,
+            userId: profile._id,
+          }),
+        },
+      ],
+    });
+
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        reject('Booking failed');
+      }, 5000);
+      subject.subscribe({
+        next: (value) => {
+          resolve(value);
+        },
+        error: (err) => {
+          reject(err);
+        },
+      });
+    });
   }
 }
