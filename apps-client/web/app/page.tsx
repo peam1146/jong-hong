@@ -39,6 +39,11 @@ export default function Home() {
     queryKey: [`room/place`],
   })
 
+  const { data: isPenalized } = useQuery<boolean>({
+    queryKey: [`penalty`],
+  })
+
+  console.log(isPenalized)
   return (
     <>
       <div id="app-container" className="flex flex-col items-start gap-4 mb-14">
@@ -59,11 +64,13 @@ export default function Home() {
             <SignOut size={32} weight="bold" />
           </button>
         </div>
-        <div className="flex flex-row justify-start items-center gap-2 py-2 px-4 rounded-3xl border-2 border-black bg-white h-10 self-stretch">
-          <Skull size={24} weight="bold" className="text-orange" />
-          <p className="text-h4 text-orange">Penalty Period</p>
-          <p className="text-h4 text-Black">Until 17 May</p>
-        </div>
+        {isPenalized && (
+          <div className="flex flex-row justify-start items-center gap-2 py-2 px-4 rounded-3xl border-2 border-black bg-white h-10 self-stretch">
+            <Skull size={24} weight="bold" className="text-orange" />
+            <p className="text-h4 text-orange">Penalty Period</p>
+          </div>
+        )}
+
         <div className="flex flex-col gap-5 self-stretch">
           {places?.places.map((place) => (
             <PlaceCard

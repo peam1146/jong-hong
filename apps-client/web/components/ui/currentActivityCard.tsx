@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { HourglassSimpleMedium, CalendarBlank } from '@phosphor-icons/react/dist/ssr'
-import { X, DoorOpen } from '@phosphor-icons/react/dist/ssr'
+import React, { useEffect, useState } from 'react'
+
+import { CalendarBlank, HourglassSimpleMedium } from '@phosphor-icons/react/dist/ssr'
+import { DoorOpen, X } from '@phosphor-icons/react/dist/ssr'
 
 interface CardProps {
   variant: 'jonging' | 'checking' | 'notdue'
@@ -11,6 +12,8 @@ interface CardProps {
   timeLeft?: number // in seconds for joining and checking variants
   date?: string // for notdue variant
   time?: string // for notdue variant
+  onCheckOut?: () => void
+  onCanceled?: () => void
 }
 
 const formatTimeLeft = (seconds: number) => {
@@ -27,6 +30,8 @@ const CurrentActivityCard: React.FC<CardProps> = ({
   timeLeft = 0,
   date,
   time,
+  onCheckOut,
+  onCanceled,
 }) => {
   const [countdown, setCountdown] = useState(timeLeft)
 
@@ -60,10 +65,13 @@ const CurrentActivityCard: React.FC<CardProps> = ({
             <p className="text-h5 text-orange">{formatTimeLeft(countdown)}</p>
             <p className="text-h5">hr</p>
           </div>
-          <div className="flex justify-center items-center py-2 px-4 rounded-3xl border-2 border-black bg-black absolute right-4 top-2 flex-row gap-2">
+          <button
+            onClick={onCheckOut}
+            className="flex justify-center items-center py-2 px-4 rounded-3xl border-2 border-black bg-black absolute right-4 top-2 flex-row gap-2"
+          >
             <DoorOpen weight="bold" size={20} color="white" />
             <p className="text-h5 text-white">check out</p>
-          </div>
+          </button>
         </>
       )}
 
@@ -86,10 +94,13 @@ const CurrentActivityCard: React.FC<CardProps> = ({
             <p className="text-h5">at</p>
             <p className="text-h5 text-orange">{time}</p>
           </div>
-          <div className="flex justify-center items-center py-2 px-4 rounded-3xl border-2 border-black bg-white absolute right-4 top-2 flex-row gap-2">
+          <button
+            onClick={onCanceled}
+            className="flex justify-center items-center py-2 px-4 rounded-3xl border-2 border-black bg-white absolute right-4 top-2 flex-row gap-2"
+          >
             <X weight="bold" size={20} color="black" />
             <p className="text-h5 text-black">cancel</p>
-          </div>
+          </button>
         </>
       )}
     </div>

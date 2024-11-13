@@ -4,9 +4,9 @@ services:
       - redpanda
       - start
       - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
-      - --advertise-kafka-addr internal://redpanda-0:9092,external://redpanda-0:19092
+      - --advertise-kafka-addr internal://redpanda-0:9092,external://localhost:19092
       - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
-      - --advertise-pandaproxy-addr internal://redpanda-0:8082,external://redpanda-0:18082
+      - --advertise-pandaproxy-addr internal://redpanda-0:8082,external://localhost:18082
       - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
       - --rpc-addr redpanda-0:33145
       - --advertise-rpc-addr redpanda-0:33145
@@ -101,14 +101,14 @@ services:
       context: .
       dockerfile: ./apps-api/room/Dockerfile
     ports:
-      - '5000:5000'
+      - 5001:5001
     depends_on:
       - room-db
       - redpanda-0
     environment:
-      BROKER_URL: redpanda-0:19092
-      GRPC_PORT: 5000
-      DATABASE_URL: postgres://root:root@localhost:5432/room-service
+      BROKER_URL: redpanda-0:9092
+      GRPC_PORT: 5001
+      DATABASE_URL: postgres://root:root@room-db:5432/room-service
 
   #------------PENALTY---------------
 
@@ -132,7 +132,7 @@ services:
       - penalty-db
       - redpanda-0
     environment:
-      MESSAGE_BROKER_URI: redpanda-0:19092
+      MESSAGE_BROKER_URI: redpanda-0:9092
       GRPC_ADDRESS: 6000
       DB_HOST: penalty-db
       DB_PORT: 5432
@@ -160,7 +160,7 @@ services:
     depends_on:
       - redpanda-0
     environment:
-      MESSAGE_BROKER_URI: redpanda-0:19092
+      MESSAGE_BROKER_URI: redpanda-0:9092
       PORT: 7000
       MONGODB_URI: mongodb://root:password@notification-db
 
@@ -175,12 +175,15 @@ services:
       POSTGRES_DB: dbname
     volumes:
       - booking-db:/var/lib/postgresql/data
+    ports:
+      - '5434:5432'
 
   booking:
     build:
       context: .
       dockerfile: ./apps-api/booking-v2/Dockerfile
-
+      platforms:
+        - linux/amd64
     ports:
       - '8000:8000'
     depends_on:
@@ -188,8 +191,8 @@ services:
       - redpanda-0
     environment:
       PORT: 8000
-      DATABASE_URL: postgres://user:password@booking-db:5432/dbname
-      KAFKA_BROKERS: redpanda-0:19092
+      DATABASE_URL: postgres://user:password@booking-db:5432/booking
+      KAFKA_BROKERS: redpanda-0:9092
 
 volumes:
   redpanda-0: null

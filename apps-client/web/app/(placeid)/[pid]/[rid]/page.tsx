@@ -5,17 +5,20 @@ import { Button } from '@/components/ui/button'
 import { JongPopup } from '@/components/ui/jongPopup'
 import { TimeBox } from '@/components/ui/timeBox'
 import { TimeDivider } from '@/components/ui/timeDivider'
-import { ArrowLeft, CaretLeft, CaretRight, User } from '@phosphor-icons/react/dist/ssr'
+import { useToast } from '@/hooks/use-toast'
+import { processBookings } from '@/lib/time'
+import { ArrowLeft, CaretLeft, CaretRight, Skull, User } from '@phosphor-icons/react/dist/ssr'
 import { useQuery } from '@tanstack/react-query'
-import { addDays, format } from 'date-fns'
+import { addDays, addHours, format } from 'date-fns'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 export default function RoomDetailPage({ params }: { params: { rid: string; pid: string } }) {
+  const { toast } = useToast()
   const { pid, rid } = params
   const [popupOpen, setPopupOpen] = useState(false)
 
   const handleConfirm = () => {
     console.log('Confirmed!')
-    setPopupOpen(false)
   }
 
   const { data: room } = useQuery<{
@@ -29,7 +32,37 @@ export default function RoomDetailPage({ params }: { params: { rid: string; pid:
     queryKey: [`room/room/${rid}`],
   })
 
+  const { data: places } = useQuery<{
+    places: {
+      id: string
+      name: string
+      open: string
+      close: string
+      availableCount: number
+    }[]
+  }>({
+    queryKey: [`room/place`],
+  })
+
+  const { data } = useQuery<{
+    bookings: {
+      bookingId: string
+      userId: string
+      checkIn: string // ISO string
+      checkOut: string // ISO string
+    }[]
+  }>({
+    queryKey: [`booking/room/${rid}`],
+  })
   const [displayDate, setDisplayDate] = useState(new Date())
+  const place = places?.places.find((place) => place.id === pid)
+  const slot = processBookings(
+    data?.bookings.filter(({ checkIn }) => {
+      return new Date(checkIn).getDate() === displayDate.getDate()
+    }) ?? [],
+    place?.open ?? '10:00 AM',
+    place?.close ?? '10:00 PM'
+  )
 
   const goBack = () => {
     setDisplayDate((prev) => addDays(prev, -1))
@@ -39,6 +72,14 @@ export default function RoomDetailPage({ params }: { params: { rid: string; pid:
     setDisplayDate((prev) => addDays(prev, 1))
   }
 
+  const router = useRouter()
+
+  const { data: isPenalized } = useQuery<boolean>({
+    queryKey: [`penalty`],
+  })
+
+  console.log(isPenalized)
+
   return (
     <div id="app-container" className="h-max bg-mustard flex flex-col gap-4">
       <JongPopup
@@ -47,7 +88,34 @@ export default function RoomDetailPage({ params }: { params: { rid: string; pid:
         title="Jong this hong"
         description=""
         confirmLabel="Confirm"
-        onConfirm={handleConfirm}
+        onConfirm={({ date, startTime, endTime }) => {
+          fetch(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/booking`, {
+            method: 'POST',
+            body: JSON.stringify({
+              roomId: rid,
+              checkIn: addHours(new Date(`${date} ${startTime}`), 7).toISOString(),
+              checkOut: addHours(new Date(`${date} ${endTime}`), 7).toISOString(),
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          }).then((res) => {
+            if (res.ok) {
+              toast({
+                title: 'Booking successful',
+                description: 'Your booking has been confirmed.',
+              })
+              router.push('/')
+            } else {
+              toast({
+                title: 'Booking fail',
+                variant: 'destructive',
+              })
+            }
+          })
+          setPopupOpen(false)
+        }}
       ></JongPopup>
       <Link
         href={`/${pid}`}
@@ -82,40 +150,33 @@ export default function RoomDetailPage({ params }: { params: { rid: string; pid:
             <CaretRight size={32} weight="bold" />
           </button>
         </div>
-        <div className="flex flex-col items-start gap-2 self-stretch max-h-[calc(100vh-380px)] overflow-scroll">
-          <TimeDivider time="10:30AM" />
-          <TimeBox variant="booked" />
-          <TimeDivider time="12:30AM" />
-          <TimeBox variant="empty" />
-          <TimeDivider time="14:30AM" />
-          <TimeBox variant="booked" />
-          <TimeDivider time="16:30AM" />
-          <TimeDivider time="10:30AM" />
-          <TimeBox variant="booked" />
-          <TimeDivider time="12:30AM" />
-          <TimeBox variant="empty" />
-          <TimeDivider time="14:30AM" />
-          <TimeBox variant="booked" />
-          <TimeDivider time="16:30AM" />
-          <TimeDivider time="10:30AM" />
-          <TimeBox variant="booked" />
-          <TimeDivider time="12:30AM" />
-          <TimeBox variant="empty" />
-          <TimeDivider time="14:30AM" />
-          <TimeBox variant="booked" />
-          <TimeDivider time="16:30AM" />
-          <TimeDivider time="10:30AM" />
-          <TimeBox variant="booked" />
-          <TimeDivider time="12:30AM" />
-          <TimeBox variant="empty" />
-          <TimeDivider time="14:30AM" />
-          <TimeBox variant="booked" />
-          <TimeDivider time="16:30AM" />
+        <div className=" self-stretch space-y-2 max-h-[calc(100vh-380px)] overflow-scroll">
+          {slot.map((slot, index) => {
+            if (slot.type === 'separator') {
+              return <TimeDivider key={index} time={slot.label} />
+            }
+            return (
+              <TimeBox
+                key={index}
+                variant={slot.status as 'booked' | 'available' | null | undefined}
+                style={{
+                  height: 100 * slot.length,
+                }}
+              />
+            )
+          })}
         </div>
       </div>
-      <Button onClick={() => setPopupOpen(true)} className="self-stretch">
-        Jong This Hong
-      </Button>
+      {isPenalized ? (
+        <div className="flex flex-row justify-start items-center gap-2 py-2 px-4 rounded-3xl border-2 border-black bg-white h-10 self-stretch">
+          <Skull size={24} weight="bold" className="text-orange" />
+          <p className="text-h4 text-orange">Penalty Period</p>
+        </div>
+      ) : (
+        <Button onClick={() => setPopupOpen(true)} className="self-stretch">
+          Jong This Hong
+        </Button>
+      )}
     </div>
   )
 }

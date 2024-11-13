@@ -42,6 +42,8 @@ const BookingRequested = v.object({
     v.transform((v) => new Date(v))
   ),
 })
+// Example of BookingRequested
+
 
 const BookingCanceled = v.object({
   bookingId: v.string(),

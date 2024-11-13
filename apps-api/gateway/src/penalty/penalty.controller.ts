@@ -2,9 +2,19 @@ import {
   PENALTY_GAPI_SERVICE_NAME,
   PenaltyGapiClient,
 } from '@jong-hong/grpc/nestjs/proto/penalty/penalty';
-import { Controller, Get, Inject, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
+
+import { getProfile } from '../utils/profile';
 
 @Controller('penalty')
 export class PenaltyController {
@@ -20,8 +30,31 @@ export class PenaltyController {
       );
   }
 
-  @Get('/:userId')
-  async isPenalized(@Param('userId') userId: string) {
-    return lastValueFrom(this.penaltyServiceClient.isUserPenalized({ userId }));
+  @Get('/')
+  async isPenalized(@Req() req) {
+    const profile = await getProfile(req);
+    try {
+      await lastValueFrom(
+        this.penaltyServiceClient.isUserPenalized({ userId: profile._id }),
+      );
+      return false;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  //Debug
+  @Post('/:userId')
+  async penalize(
+    @Param('userId') userId: string,
+    @Body() body: { penaltyTime: number; causedBy: string },
+  ) {
+    return lastValueFrom(
+      this.penaltyServiceClient.insertPenalty({
+        userId,
+        penaltyTime: body.penaltyTime,
+        causedBy: body.causedBy,
+      }),
+    );
   }
 }

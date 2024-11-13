@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 import { FilterPopup } from '@/components/ui/filterPopup'
 import { RoomCard } from '@/components/ui/roomCard'
-import { ArrowLeft, Clock, Funnel } from '@phosphor-icons/react/dist/ssr'
+import { ArrowLeft, Clock, Funnel, Ghost } from '@phosphor-icons/react/dist/ssr'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
 
@@ -85,7 +85,14 @@ export default function PlaceDetailPage({ params }: { params: { pid: string } })
             name={room.name}
             numberOfPeople={`${room.minOccupancy} - ${room.maxOccupancy}`}
           />
-        ))}
+        )) ?? (
+          <div className="m-auto col-span-2 flex flex-col items-center opacity-40 mt-[20vh]">
+            <Ghost size={64} />
+            <div className="text-center">
+              No hong is available based on your selected preference.
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

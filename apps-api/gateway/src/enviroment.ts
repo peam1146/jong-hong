@@ -8,6 +8,8 @@ export const EnvironmentSchema = v.object({
   AUTH_SERVICE_URL: v.string(),
   ROOM_SERVICE_URL: v.string(),
   PENALTY_SERVICE_URL: v.string(),
+  MESSAGE_BROKER_URL: v.string(),
+  BOOKING_SERVICE_URL: v.string(),
 });
 
 export const environment = v.parse(EnvironmentSchema, process.env);
