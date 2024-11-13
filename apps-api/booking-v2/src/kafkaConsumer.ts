@@ -19,6 +19,8 @@ const TopicMap = {
   BOOKING_CANCELED_FAILED_TOPIC: 'booking.canceled.failed',
   BOOKING_CHECK_IN_SUCCESS_TOPIC: 'booking.checkin.success',
   BOOKING_CHECK_OUT_SUCCESS_TOPIC: 'booking.checkout.success',
+  NOTIFICATION_NOTIFY_TOPIC: 'notification-notify',
+  NOTIFICATION_NOTIFY_CANCELED_TOPIC: 'notification-notify.canceled',
 } as const
 
 const SubscribedTopics = {
@@ -277,6 +279,20 @@ async function bookingRequested(payload: Buffer) {
       },
     ],
   })
+  await publisher.send({
+    topic: TopicMap.NOTIFICATION_NOTIFY_TOPIC,
+    messages: [
+      {
+        value: JSON.stringify({
+          bookingId: parsed.output.bookingId,
+          userId: parsed.output.userId,
+          roomId: parsed.output.roomId,
+          CheckinTime: parsed.output.checkIn.toISOString(),
+          CheckoutTime: parsed.output.checkOut.toISOString(),
+        }),
+      },
+    ],
+  })
 }
 
 async function bookingCanceled(payload: Buffer) {
@@ -329,6 +345,27 @@ async function bookingCanceled(payload: Buffer) {
           data: {
             bookingId: parsed.output.bookingId,
           },
+        }),
+      },
+    ],
+  })
+
+  const booking = await db.query.Booking.findFirst({
+    where: (t, { eq }) => eq(t.bookingId, parsed.output.bookingId),
+    columns: {
+      roomId: true,
+      userId: true,
+    },
+  })
+
+  await publisher.send({
+    topic: TopicMap.NOTIFICATION_NOTIFY_CANCELED_TOPIC,
+    messages: [
+      {
+        value: JSON.stringify({
+          bookingId: parsed.output.bookingId,
+          roomId: booking?.roomId,
+          userId: booking?.userId,
         }),
       },
     ],
