@@ -44,7 +44,7 @@ func (r *PenaltyRepositoryImpl) IsUserPenalized(userId string) error {
 		return err
 	}
 
-	time := time.Now().UnixMilli()
+	time := time.Now().Unix()
 	if time > penalty.PenaltyTime+penalty.CreatedAt {
 		err = r.DeletePenaltyById(penalty.Id)
 		if err != nil {
