@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 
 import { useAuthContext } from '@/components/provider/auth'
 import { Navbar } from '@/components/ui/navbar'
@@ -10,7 +10,7 @@ import { SignOut, Skull } from '@phosphor-icons/react/dist/ssr'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
 
-export default function Home() {
+function Home() {
   const { toast } = useToast()
   const searchParams = useSearchParams()
   const { setToken } = useAuthContext()
@@ -89,5 +89,13 @@ export default function Home() {
       </div>
       <Navbar />
     </>
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense>
+      <Home />
+    </Suspense>
   )
 }

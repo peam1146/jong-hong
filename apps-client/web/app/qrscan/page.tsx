@@ -1,16 +1,12 @@
 'use client'
-import { useState } from 'react'
+import { Suspense } from 'react'
 import { QrReader } from 'react-qr-reader'
 
 import { useToast } from '@/hooks/use-toast'
 import { ArrowLeft } from '@phosphor-icons/react/dist/ssr'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-export default function QrScanPage() {
-  const [error, setError] = useState<string | null>(null)
-
+function QrScanPage() {
   const { toast } = useToast()
-  const router = useRouter()
 
   // Handle successful QR code scan
   const handleScan = (data: string | null) => {
@@ -22,7 +18,7 @@ export default function QrScanPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
-      }).then((res) => {
+      }).then(() => {
         toast({
           title: 'Check in Success',
           description: 'You have successfully checked in',
@@ -58,5 +54,13 @@ export default function QrScanPage() {
         <p>Waiting for QR code...</p>
       </div>
     </div>
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense>
+      <QrScanPage />
+    </Suspense>
   )
 }

@@ -2,7 +2,7 @@
 
 import './globals.css'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 import { AuthProvider } from '@/components/provider/auth'
 import { Toaster } from '@/components/ui/toaster'
@@ -35,7 +35,7 @@ const queryClient = new QueryClient({
   },
 })
 
-export default function RootLayout({
+function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
@@ -77,5 +77,17 @@ export default function RootLayout({
         </AuthProvider>
       </body>
     </html>
+  )
+}
+
+export default function Layout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  return (
+    <Suspense>
+      <RootLayout>{children}</RootLayout>
+    </Suspense>
   )
 }

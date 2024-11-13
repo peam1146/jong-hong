@@ -1,5 +1,5 @@
 {
-  "name": "qr",
+  "name": "@api/qr",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {

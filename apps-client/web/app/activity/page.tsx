@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 import { CurrentActivityCard } from '@/components/ui/currentActivityCard'
 import { Navbar } from '@/components/ui/navbar'
@@ -10,7 +10,7 @@ import { toast } from '@/hooks/use-toast'
 import { useQuery } from '@tanstack/react-query'
 import { addMinutes, format, isBefore } from 'date-fns'
 
-export default function ActivityPage() {
+function ActivityPage() {
   const { data, refetch } = useQuery<{
     bookings: {
       bookingId: string
@@ -160,5 +160,13 @@ export default function ActivityPage() {
       </Tabs>
       <Navbar />
     </div>
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense>
+      <ActivityPage />
+    </Suspense>
   )
 }
