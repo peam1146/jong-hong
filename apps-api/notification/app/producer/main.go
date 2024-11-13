@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -33,12 +34,14 @@ func main() {
 		Topic: "notification-notify",
 	}
 	conn := utils.KafkaConn(cfg)
+	fmt.Println(time.Now().Add(15*time.Minute + 10*time.Second).String())
 
-	noti := models.Notification{
-		UserId:   userId,
-		RoomId:   "1",
-		Type:     models.NotCheckin,
-		CreateAt: time.Now().String(),
+	noti := models.NotificationRequest{
+		UserId:       userId,
+		BookingId:    "2",
+		RoomId:       "1",
+		CheckinTime:  time.Now().Add(10 * time.Second).String(),
+		CheckoutTime: time.Now().Add(30*time.Minute + 10*time.Second).String(),
 	}
 
 	// Check topic if already exists or not

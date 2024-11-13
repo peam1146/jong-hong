@@ -9,9 +9,24 @@ const (
 	NotCheckout    NotificationType = "NOT_CHECKOUT"
 )
 
+type NotificationRequest struct {
+	UserId       string `json:"userId"`
+	BookingId    string `json:"bookingId"`
+	RoomId       string `json:"roomId"`
+	CheckinTime  string `json:"CheckinTime"`
+	CheckoutTime string `json:"CheckoutTime"`
+}
+
+type NotificationCanceledRequest struct {
+	BookingId string `json:"bookingId"`
+}
+
 type Notification struct {
-	Type     NotificationType `json:"type"`
-	UserId   string           `json:"userId"`
-	RoomId   string           `json:"roomId"`
-	CreateAt string           `json:"CreateAt"`
+	Type         NotificationType `json:"type"`
+	UserId       string           `json:"userId"`
+	BookingId    string           `json:"bookingId"`
+	RoomId       string           `json:"roomId"`
+	CheckinTime  int64            `json:"CheckinTime"`
+	CheckoutTime int64            `json:"CheckoutTime"`
+	// CreateAt string           `json:"CreateAt"`
 }
