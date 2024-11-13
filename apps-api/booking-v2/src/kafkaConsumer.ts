@@ -160,6 +160,7 @@ async function bookingRequested(payload: Buffer) {
     messages: [
       {
         value: JSON.stringify({
+          bookingId: parsed.output.bookingId,
           userId: parsed.output.userId,
           roomId: parsed.output.roomId,
           CheckinTime: parsed.output.checkIn.toISOString(),
@@ -225,12 +226,22 @@ async function bookingCanceled(payload: Buffer) {
     ],
   })
 
+  const booking = await db.query.Booking.findFirst({
+    where: (t, { eq }) => eq(t.bookingId, parsed.output.bookingId),
+    columns: {
+      roomId: true,
+      userId: true,
+    },
+  })
+
   await publisher.send({
     topic: TopicMap.NOTIFICATION_NOTIFY_CANCELED_TOPIC,
     messages: [
       {
         value: JSON.stringify({
           bookingId: parsed.output.bookingId,
+          roomId: booking?.roomId,
+          userId: booking?.userId,
         }),
       },
     ],
