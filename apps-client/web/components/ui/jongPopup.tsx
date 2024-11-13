@@ -1,6 +1,7 @@
-import * as AlertDialog from '@radix-ui/react-alert-dialog'
-import * as React from 'react'
+import { ReactNode, useState } from 'react'
+
 import { Input } from '@/components/ui/input'
+import * as AlertDialog from '@radix-ui/react-alert-dialog'
 interface PopupProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -8,7 +9,7 @@ interface PopupProps {
   description: string
   confirmLabel: string
   cancelLabel?: string
-  onConfirm: () => void
+  onConfirm: (data: { date: string; startTime: string; endTime: string }) => void
   children?: ReactNode
 }
 
@@ -22,6 +23,10 @@ export function JongPopup({
   onConfirm,
   children,
 }: PopupProps) {
+  const [date, setDate] = useState('')
+  const [startTime, setStartTime] = useState('')
+  const [endTime, setEndTime] = useState('')
+
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Portal>
@@ -33,11 +38,26 @@ export function JongPopup({
               {description}
             </AlertDialog.Description> */}
 
-            <Input type="date" placeholder="Select date" />
+            <Input
+              onChange={(e) => setDate(e.target.value)}
+              value={date}
+              type="date"
+              placeholder="Select date"
+            />
             <div className="flex flex-row gap-3 items-center self-stretch">
-              <Input type="time" placeholder="Start" />
+              <Input
+                onChange={(e) => setStartTime(e.target.value)}
+                value={startTime}
+                type="time"
+                placeholder="Start"
+              />
               <p className="text-h3">-</p>
-              <Input type="time" placeholder="End" />
+              <Input
+                onChange={(e) => setEndTime(e.target.value)}
+                value={endTime}
+                type="time"
+                placeholder="End"
+              />
             </div>
             {children}
 
@@ -49,7 +69,16 @@ export function JongPopup({
               </AlertDialog.Cancel>
               <AlertDialog.Action asChild>
                 <button
-                  onClick={onConfirm}
+                  onClick={() => {
+                    setDate('')
+                    setStartTime('')
+                    setEndTime('')
+                    onConfirm({
+                      date,
+                      startTime,
+                      endTime,
+                    })
+                  }}
                   className="bg-orange text-white border-2 border-black rounded-3xl px-4 py-2"
                 >
                   {confirmLabel}

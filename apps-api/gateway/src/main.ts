@@ -2,35 +2,23 @@ import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
 import { environment } from './enviroment';
+import { Transport } from '@nestjs/microservices';
 
 const __dirname = process.cwd();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // app.connectMicroservice<GrpcOptions>({
-  //   transport: Transport.GRPC,
-  //   options: {
-  //     url: environment.AUTH_SERVICE_URL,
-  //     package: 'room',
-  //     protoPath: [
-  //       join(__dirname, '../../packages/grpc/proto/room/room.proto'),
-  //       join(__dirname, '../../packages/grpc/proto/room/place.proto'),
-  //     ],
-  //   },
-  // });
-
-  // app.connectMicroservice<KafkaOptions>({
-  //   transport: Transport.KAFKA,
-  //   options: {
-  //     client: {
-  //       brokers: [environment.BROKER_URL],
-  //     },
-  //     consumer: {
-  //       groupId: 'room-service',
-  //     },
-  //   },
-  // });
-
+  app.connectMicroservice({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        brokers: [environment.MESSAGE_BROKER_URL],
+      },
+      consumer: {
+        groupId: 'gateway-consumer',
+      },
+    },
+  });
   app.enableCors({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

@@ -20,11 +20,13 @@ model RoomConfig {
 }
 
 model Booking {
-  bookingId String   @id
-  roomId    String
-  userId    String
-  checkIn   DateTime
-  checkOut  DateTime
+  bookingId    String    @id
+  roomId       String
+  userId       String
+  checkIn      DateTime
+  checkOut     DateTime
+  checkInTime  DateTime?
+  checkOutTime DateTime?
 
   @@map("bookings")
 }

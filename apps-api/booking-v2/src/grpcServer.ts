@@ -9,12 +9,15 @@ import {
   GetUserBookingsResponse,
 } from '@jong-hong/grpc/ts/proto/booking/reserve'
 
-import { Db } from './databaes'
+import { Db, db } from './databaes'
 
 import { Booking } from '../drizzle/schema'
 
 export class BookingReserveServiceServer implements BookingReserveServiceImplementation {
-  constructor(private db: Db) {}
+  db: Db
+  constructor() {
+    this.db = db
+  }
 
   async getUserBookings({
     userId,
