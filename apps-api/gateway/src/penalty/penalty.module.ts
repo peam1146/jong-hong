@@ -7,7 +7,7 @@ import { PenaltyController } from './penalty.controller';
 
 import { environment } from '../enviroment';
 
-const __dirname = process.cwd();
+const __dirname = 'apps-api/gateway';
 
 @Module({
   imports: [

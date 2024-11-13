@@ -8,7 +8,7 @@ import { RoomController } from './room.controller';
 
 import { environment } from '../enviroment';
 
-const __dirname = process.cwd();
+const __dirname = 'apps-api/gateway';
 
 @Module({
   imports: [

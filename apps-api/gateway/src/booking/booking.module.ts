@@ -1,17 +1,13 @@
-import { PLACE_SERVICE_NAME } from '@jong-hong/grpc/nestjs/proto/room/place';
-import { ROOM_SERVICE_NAME } from '@jong-hong/grpc/nestjs/proto/room/room';
+import { BOOKING_RESERVE_SERVICE_NAME } from '@jong-hong/grpc/nestjs/proto/booking/reserve';
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 
-import { environment } from '../enviroment';
 import { BookingController } from './booking.controller';
-import {
-  BOOKING_PACKAGE_NAME,
-  BOOKING_RESERVE_SERVICE_NAME,
-} from '@jong-hong/grpc/nestjs/proto/booking/reserve';
 
-const __dirname = process.cwd();
+import { environment } from '../enviroment';
+
+const __dirname = 'apps-api/gateway';
 
 @Module({
   imports: [
