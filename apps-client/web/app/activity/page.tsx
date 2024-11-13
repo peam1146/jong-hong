@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query'
 import { addMinutes, format, isBefore } from 'date-fns'
 
 export default function ActivityPage() {
-  const { data } = useQuery<{
+  const { data, refetch } = useQuery<{
     bookings: {
       bookingId: string
       userId: string
@@ -57,7 +57,7 @@ export default function ActivityPage() {
         </TabsList>
 
         <TabsContent value="CurrentBooking" className="flex flex-col gap-3">
-          {data?.bookings
+          {(data?.bookings ?? [])
             .filter((booking) => isBefore(new Date(booking.checkOut), new Date()) === false)
             .map((booking) => {
               const status = isBefore(new Date(), new Date(booking.checkIn))
@@ -103,6 +103,7 @@ export default function ActivityPage() {
                     )
 
                     if (res.ok) {
+                      refetch()
                       toast({
                         title: 'Check out successful',
                         description: 'You have successfully checkout',
@@ -133,7 +134,7 @@ export default function ActivityPage() {
         </TabsContent>
 
         <TabsContent value="PastHistory" className="flex flex-col gap-3">
-          {data?.bookings
+          {(data?.bookings ?? [])
             .filter((booking) => isBefore(new Date(booking.checkOut), new Date()) === true)
             .map((booking) => {
               const placeName = roomAndPlace.find((room) =>

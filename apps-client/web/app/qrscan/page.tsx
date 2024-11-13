@@ -16,11 +16,19 @@ export default function QrScanPage() {
   const handleScan = (data: string | null) => {
     if (data) {
       console.log(data)
-      toast({
-        title: 'Check in Success',
-        description: 'You have successfully checked in',
+      fetch(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/booking/checkin/${data}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      }).then((res) => {
+        toast({
+          title: 'Check in Success',
+          description: 'You have successfully checked in',
+        })
+        window.location.href = '/activity'
       })
-      window.location.href = '/activity'
     }
   }
 
